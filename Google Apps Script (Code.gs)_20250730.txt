@@ -1,0 +1,101 @@
+// Google Apps Script (Code.gs) - 수정된 버전
+function doGet(e) {
+  try {
+    const sheet = SpreadsheetApp.openById('1Ke5jewImhcCk_oHh0kLH3qr99WEGamnDqPmflnCdgQU').getSheetByName('UserData');
+    
+    if (e.parameter.action === 'loadUser') {
+      const result = loadUserData(sheet, e.parameter.userId);
+      const callback = e.parameter.callback;
+      
+      if (callback) {
+        return ContentService.createTextOutput(callback + '(' + result.getContent() + ')')
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      } else {
+        return result;
+      }
+    } else if (e.parameter.action === 'updateUser') {
+      return updateUserData(sheet, e.parameter);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Invalid action'}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    const errorResponse = JSON.stringify({status: 'error', message: error.toString()});
+    if (e.parameter.callback) {
+      return ContentService.createTextOutput(e.parameter.callback + '(' + errorResponse + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    return ContentService.createTextOutput(errorResponse)
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.openById('1Ke5jewImhcCk_oHh0kLH3qr99WEGamnDqPmflnCdgQU').getSheetByName('UserData');
+    const data = JSON.parse(e.postData.contents);
+    
+    switch(data.action) {
+      case 'loadUser':
+        return loadUserData(sheet, data.userId);
+      case 'updateUser':
+        return updateUserData(sheet, data);
+      case 'createUser':
+        return createUserData(sheet, data);
+      default:
+        throw new Error('Invalid action');
+    }
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function loadUserData(sheet, userId) {
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const userIndex = data.findIndex(row => row[0] == userId);
+  
+  if (userIndex > 0) {
+    const userData = {};
+    headers.forEach((header, index) => {
+      userData[header] = data[userIndex][index];
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      data: userData
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+  } else {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'not_found'
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function updateUserData(sheet, data) {
+  const sheetData = sheet.getDataRange().getValues();
+  const userIndex = sheetData.findIndex(row => row[0] == data.userId);
+  
+  if (userIndex > 0) {
+    // Update specific cells
+    if (data.rollCount) sheet.getRange(userIndex + 1, 4).setValue(parseInt(data.rollCount));
+    if (data.rollTri) sheet.getRange(userIndex + 1, 5).setValue(parseInt(data.rollTri));
+    if (data.rollStr) sheet.getRange(userIndex + 1, 6).setValue(parseInt(data.rollStr));
+    if (data.rollDou) sheet.getRange(userIndex + 1, 7).setValue(parseInt(data.rollDou));
+    if (data.rollSum) sheet.getRange(userIndex + 1, 8).setValue(parseInt(data.rollSum));
+    if (data.lastDate) sheet.getRange(userIndex + 1, 10).setValue(data.lastDate);
+    if (data.initialDate && !sheetData[userIndex][8]) {
+      sheet.getRange(userIndex + 1, 9).setValue(data.initialDate);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({status: 'success'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'User not found'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
