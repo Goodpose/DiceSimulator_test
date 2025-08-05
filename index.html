@@ -1,4 +1,17 @@
-<!DOCTYPE html>
+#coin-display {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+            
+            .coin-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
+            
+            .coin-count {
+                font-size: 16px;
+            }<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -25,6 +38,7 @@
             --dice-size-mobile: 60px;
             --dot-size: 12px;
             --dot-size-mobile: 8px;
+            --animation-duration: 1s;
         }
 
         body {
@@ -38,10 +52,7 @@
         /* Loading Screen */
         #loading-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: var(--bg-dark);
             display: flex;
             flex-direction: column;
@@ -69,6 +80,7 @@
             color: #888;
         }
 
+        /* Main Container */
         #canvas-container {
             width: 100vw;
             height: 60vh;
@@ -78,10 +90,11 @@
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            padding: 80px 20px 20px 20px;
+            padding: 80px 20px 20px;
             gap: 20px;
         }
 
+        /* Result Display */
         #result-display {
             position: absolute;
             top: 20px;
@@ -123,24 +136,20 @@
             letter-spacing: 1px;
         }
 
-        .combo-double {
-            color: var(--double-color);
-            text-shadow: 0 0 15px var(--double-color), 0 0 30px var(--double-color);
+        /* Combo Colors */
+        .combo-double { --combo-color: var(--double-color); }
+        .combo-triple { --combo-color: var(--triple-color); }
+        .combo-straight { --combo-color: var(--straight-color); }
+
+        .combo-double, .combo-triple, .combo-straight {
+            color: var(--combo-color);
+            text-shadow: 0 0 15px var(--combo-color), 0 0 30px var(--combo-color);
         }
 
-        .combo-triple {
-            color: var(--triple-color);
-            text-shadow: 0 0 15px var(--triple-color), 0 0 30px var(--triple-color);
-            animation: glow 1s ease-in-out infinite alternate;
-        }
+        .combo-triple { animation: glow var(--animation-duration) ease-in-out infinite alternate; }
+        .combo-straight { animation: rainbow 3s linear infinite; }
 
-        .combo-straight {
-            color: var(--straight-color);
-            text-shadow: 0 0 15px var(--straight-color), 0 0 30px var(--straight-color);
-            animation: rainbow 3s linear infinite;
-        }
-
-        /* User Info Display */
+        /* User Info */
         #user-info {
             position: absolute;
             top: 20px;
@@ -158,6 +167,50 @@
             font-weight: bold;
         }
 
+        /* Coin Display */
+        #coin-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin-icon {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 35% 35%, #ffd700, #ffb300);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 
+                0 2px 5px rgba(0, 0, 0, 0.3),
+                inset -2px -2px 5px rgba(0, 0, 0, 0.2),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #b8860b;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin-count {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
         /* Animations */
         @keyframes pulse {
             0%, 100% { transform: translateX(-50%) scale(1); }
@@ -165,8 +218,8 @@
         }
 
         @keyframes glow {
-            from { text-shadow: 0 0 15px var(--triple-color), 0 0 30px var(--triple-color); }
-            to { text-shadow: 0 0 20px var(--triple-color), 0 0 40px var(--triple-color), 0 0 50px var(--triple-color); }
+            from { text-shadow: 0 0 15px var(--combo-color), 0 0 30px var(--combo-color); }
+            to { text-shadow: 0 0 20px var(--combo-color), 0 0 40px var(--combo-color), 0 0 50px var(--combo-color); }
         }
 
         @keyframes rainbow {
@@ -193,65 +246,28 @@
             animation: roll 0.5s ease-in-out infinite;
         }
 
-        .dice.highlight-double {
-            animation: highlightDouble 1s ease-in-out infinite;
+        /* Highlight animations */
+        .dice.highlight-double { --highlight-color: var(--double-color); animation: highlightBounce var(--animation-duration) ease-in-out infinite; }
+        .dice.highlight-triple { --highlight-color: var(--triple-color); animation: highlightRotate var(--animation-duration) ease-in-out infinite; }
+        .dice.highlight-straight { --highlight-color: var(--straight-color); animation: highlightScale var(--animation-duration) ease-in-out infinite; }
+
+        @keyframes highlightBounce {
+            0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 20px var(--highlight-color)); }
+            50% { transform: scale(1.1) translateY(-5px); filter: drop-shadow(0 0 30px var(--highlight-color)); }
         }
 
-        .dice.highlight-triple {
-            animation: highlightTriple 1s ease-in-out infinite;
+        @keyframes highlightRotate {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px var(--highlight-color)); }
+            25% { transform: scale(1.15) rotate(5deg); filter: drop-shadow(0 0 40px var(--highlight-color)); }
+            75% { transform: scale(1.15) rotate(-5deg); filter: drop-shadow(0 0 40px var(--highlight-color)); }
         }
 
-        .dice.highlight-straight {
-            animation: highlightStraight 1s ease-in-out infinite;
-        }
-
-        @keyframes highlightDouble {
-            0%, 100% {
-                transform: scale(1) translateY(0);
-                filter: drop-shadow(0 0 20px var(--double-color));
-            }
-            50% {
-                transform: scale(1.1) translateY(-5px);
-                filter: drop-shadow(0 0 30px var(--double-color));
-            }
-        }
-
-        @keyframes highlightTriple {
-            0%, 100% {
-                transform: scale(1) rotate(0deg);
-                filter: drop-shadow(0 0 20px var(--triple-color));
-            }
-            25% {
-                transform: scale(1.15) rotate(5deg);
-                filter: drop-shadow(0 0 40px var(--triple-color));
-            }
-            75% {
-                transform: scale(1.15) rotate(-5deg);
-                filter: drop-shadow(0 0 40px var(--triple-color));
-            }
-        }
-
-        @keyframes highlightStraight {
-            0% {
-                transform: scale(1);
-                filter: drop-shadow(0 0 20px var(--straight-color));
-            }
-            25% {
-                transform: scale(1.05);
-                filter: drop-shadow(0 0 25px #44A3FF);
-            }
-            50% {
-                transform: scale(1.1);
-                filter: drop-shadow(0 0 30px #B565D8);
-            }
-            75% {
-                transform: scale(1.05);
-                filter: drop-shadow(0 0 25px #44A3FF);
-            }
-            100% {
-                transform: scale(1);
-                filter: drop-shadow(0 0 20px var(--straight-color));
-            }
+        @keyframes highlightScale {
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px var(--straight-color)); }
+            25% { transform: scale(1.05); filter: drop-shadow(0 0 25px #44A3FF); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 30px #B565D8); }
+            75% { transform: scale(1.05); filter: drop-shadow(0 0 25px #44A3FF); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--straight-color)); }
         }
 
         .dice-face {
@@ -267,19 +283,11 @@
             transition: all 0.3s ease;
         }
 
-        .dice.highlight-double .dice-face {
-            border: 3px solid var(--double-color);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-        }
-
-        .dice.highlight-triple .dice-face {
-            border: 3px solid var(--triple-color);
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
-        }
-
+        .dice.highlight-double .dice-face,
+        .dice.highlight-triple .dice-face,
         .dice.highlight-straight .dice-face {
-            border: 3px solid var(--straight-color);
-            box-shadow: 0 0 30px rgba(78, 205, 196, 0.6);
+            border: 3px solid var(--highlight-color);
+            box-shadow: 0 0 30px var(--highlight-color);
         }
 
         .dice-dot {
@@ -294,38 +302,35 @@
             position: relative;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* Dot Patterns */
+        /* Dot Patterns - Optimized with nth-child */
         .dots-1 .dice-dot { top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
         .dots-2 .dice-dot:nth-child(1) { top: 25%; left: 25%; }
         .dots-2 .dice-dot:nth-child(2) { bottom: 25%; right: 25%; }
 
-        .dots-3 .dice-dot:nth-child(1) { top: 20%; left: 20%; }
+        .dots-3 .dice-dot { top: 20%; left: 20%; }
         .dots-3 .dice-dot:nth-child(2) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .dots-3 .dice-dot:nth-child(3) { bottom: 20%; right: 20%; }
+        .dots-3 .dice-dot:nth-child(3) { top: auto; bottom: 20%; left: auto; right: 20%; }
 
-        .dots-4 .dice-dot:nth-child(1) { top: 25%; left: 25%; }
-        .dots-4 .dice-dot:nth-child(2) { top: 25%; right: 25%; }
-        .dots-4 .dice-dot:nth-child(3) { bottom: 25%; left: 25%; }
-        .dots-4 .dice-dot:nth-child(4) { bottom: 25%; right: 25%; }
+        .dots-4 .dice-dot { top: 25%; left: 25%; }
+        .dots-4 .dice-dot:nth-child(2) { left: auto; right: 25%; }
+        .dots-4 .dice-dot:nth-child(3) { top: auto; bottom: 25%; }
+        .dots-4 .dice-dot:nth-child(4) { top: auto; bottom: 25%; left: auto; right: 25%; }
 
-        .dots-5 .dice-dot:nth-child(1) { top: 20%; left: 20%; }
-        .dots-5 .dice-dot:nth-child(2) { top: 20%; right: 20%; }
+        .dots-5 .dice-dot { top: 20%; left: 20%; }
+        .dots-5 .dice-dot:nth-child(2) { left: auto; right: 20%; }
         .dots-5 .dice-dot:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .dots-5 .dice-dot:nth-child(4) { bottom: 20%; left: 20%; }
-        .dots-5 .dice-dot:nth-child(5) { bottom: 20%; right: 20%; }
+        .dots-5 .dice-dot:nth-child(4) { top: auto; bottom: 20%; }
+        .dots-5 .dice-dot:nth-child(5) { top: auto; bottom: 20%; left: auto; right: 20%; }
 
-        .dots-6 .dice-dot:nth-child(1) { top: 20%; left: 25%; }
-        .dots-6 .dice-dot:nth-child(2) { top: 20%; right: 25%; }
-        .dots-6 .dice-dot:nth-child(3) { top: 50%; left: 25%; transform: translateY(-50%); }
-        .dots-6 .dice-dot:nth-child(4) { top: 50%; right: 25%; transform: translateY(-50%); }
-        .dots-6 .dice-dot:nth-child(5) { bottom: 20%; left: 25%; }
-        .dots-6 .dice-dot:nth-child(6) { bottom: 20%; right: 25%; }
+        .dots-6 .dice-dot { top: 20%; left: 25%; }
+        .dots-6 .dice-dot:nth-child(2) { left: auto; right: 25%; }
+        .dots-6 .dice-dot:nth-child(3) { top: 50%; transform: translateY(-50%); }
+        .dots-6 .dice-dot:nth-child(4) { top: 50%; left: auto; right: 25%; transform: translateY(-50%); }
+        .dots-6 .dice-dot:nth-child(5) { top: auto; bottom: 20%; }
+        .dots-6 .dice-dot:nth-child(6) { top: auto; bottom: 20%; left: auto; right: 25%; }
 
         /* Controls */
         .controls {
@@ -342,7 +347,7 @@
             margin-bottom: 20px;
         }
 
-        .control-group {
+        .control-group, .score-display {
             flex: 1;
             background: var(--bg-medium);
             padding: 15px;
@@ -350,20 +355,23 @@
         }
 
         .score-display {
-            flex: 1;
-            background: var(--bg-medium);
-            padding: 15px;
-            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        .score-display h3 {
+        .control-group h3, .score-display h3 {
             font-size: 16px;
-            color: #888;
             margin-bottom: 10px;
+        }
+
+        .control-group h3 {
+            color: #fff;
+        }
+
+        .score-display h3 {
+            color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -372,12 +380,6 @@
             font: bold 48px 'Russo One', sans-serif;
             color: #fff;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        .control-group h3 {
-            margin-bottom: 10px;
-            font-size: 16px;
-            color: #fff;
         }
 
         .control-row {
@@ -397,22 +399,13 @@
             color: #ccc;
         }
 
-        input[type="number"], input[type="color"] {
+        input[type="color"] {
             flex: 1;
+            height: 36px;
             padding: 8px;
             background: #333;
             border: 1px solid var(--border-color);
             border-radius: 5px;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        input[type="number"] {
-            width: 80px;
-        }
-
-        input[type="color"] {
-            height: 36px;
             cursor: pointer;
         }
 
@@ -423,8 +416,7 @@
             border: none;
             border-radius: 10px;
             color: white;
-            font-size: 20px;
-            font-weight: bold;
+            font: bold 20px/1 inherit;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
@@ -441,16 +433,38 @@
             cursor: not-allowed;
         }
 
+        /* Next Button */
+        #nextButton {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 100;
+        }
+
+        #nextButton:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        #nextButton:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
         /* Mobile Styles */
         @media (max-width: 600px) {
-            .dice-face {
-                width: var(--dice-size-mobile);
-                height: var(--dice-size-mobile);
-            }
-            
-            .dice-dot {
-                width: var(--dot-size-mobile);
-                height: var(--dot-size-mobile);
+            :root {
+                --dice-size: var(--dice-size-mobile);
+                --dot-size: var(--dot-size-mobile);
             }
             
             #result-display {
@@ -458,22 +472,10 @@
                 padding: 15px 30px;
             }
 
-            .combo-text {
-                font-size: 20px;
-            }
-
-            .combo-detail {
-                font-size: 12px;
-            }
-
-            .score-value {
-                font-size: 36px;
-            }
-
-            #user-info {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
+            .combo-text { font-size: 20px; }
+            .combo-detail { font-size: 12px; }
+            .score-value { font-size: 36px; }
+            #user-info { font-size: 12px; padding: 8px 15px; }
         }
     </style>
 </head>
@@ -486,7 +488,13 @@
     <div id="canvas-container">
         <div id="result-display">주사위를 굴려보세요!</div>
         <div id="user-info">User: <span id="userName">Loading...</span></div>
+        <div id="coin-display">
+            <div class="coin-icon">₩</div>
+            <span class="coin-count" id="coinCount">0</span>
+        </div>
     </div>
+    
+    <button id="nextButton" onclick="goToNextPage()" style="display: none;">BATTLE!</button>
     
     <div class="controls">
         <div class="control-wrapper">
@@ -512,442 +520,432 @@
     </div>
 
     <script>
-        // Google Apps Script URL (배포 후 여기에 Web App URL을 넣어주세요)
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhszjBE6IxGe9b6nXbQYHR31VtvxFxPYuCcECQmHmY_cIevrC3VMOC2Kux6cIXUDbu/exec';
-        
-        // Constants
-        const ROLL_DURATION = 1000;
-        const ROLL_INTERVAL = 100;
-        const DICE_FACES = 6;
-        const COMBO_TYPES = {
-            DOUBLE: { text: 'Double!', class: 'combo-double', highlight: 'highlight-double' },
-            TRIPLE: { text: 'Triple!', class: 'combo-triple', highlight: 'highlight-triple' },
-            STRAIGHT: { text: 'Straight!', class: 'combo-straight', highlight: 'highlight-straight' }
+        'use strict';
+
+        // Configuration
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE',
+            ROLL_DURATION: 1000,
+            ROLL_INTERVAL: 100,
+            DICE_COUNT: 3,
+            DICE_FACES: 6,
+            TIMEOUT_DURATION: 10000,
+            COMBO_TYPES: {
+                DOUBLE: { text: 'Double!', class: 'combo-double', highlight: 'highlight-double' },
+                TRIPLE: { text: 'Triple!', class: 'combo-triple', highlight: 'highlight-triple' },
+                STRAIGHT: { text: 'Straight!', class: 'combo-straight', highlight: 'highlight-straight' }
+            }
         };
 
-        // State
-        const state = {
-            userId: null,
-            userName: null,
-            diceCount: 3,
-            diceColor: '#ffffff',
-            dotColor: '#000000',
-            isRolling: false,
-            diceElements: [],
-            cumulativeScore: 0,
-            rollCount: 0,
-            rollTri: 0,
-            rollStr: 0,
-            rollDou: 0,
-            initialDate: null,
-            isFirstRoll: true
-        };
+        // Application State
+        class DiceSimulator {
+            constructor() {
+                this.state = {
+                    userId: null,
+                    userName: null,
+                    diceColor: '#ffffff',
+                    dotColor: '#000000',
+                    isRolling: false,
+                    diceElements: [],
+                    stats: {
+                        cumulativeScore: 0,
+                        rollCount: 0,
+                        rollTri: 0,
+                        rollStr: 0,
+                        rollDou: 0,
+                        coinCount: 0
+                    },
+                    isBattle: false,
+                    initialDate: null,
+                    isFirstRoll: true
+                };
 
-        // DOM Elements
-        const elements = {
-            container: document.getElementById('canvas-container'),
-            resultDisplay: document.getElementById('result-display'),
-            rollButton: document.getElementById('rollButton'),
-            diceColorInput: document.getElementById('diceColor'),
-            dotColorInput: document.getElementById('dotColor'),
-            scoreValue: document.getElementById('scoreValue'),
-            userName: document.getElementById('userName'),
-            loadingScreen: document.getElementById('loading-screen')
-        };
-
-        // Get user ID from URL parameters
-        function getUserIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
-        }
-
-        // Format date to YY.MM.DD AM/PM hh:mm:ss
-        function formatDate(date) {
-            const year = date.getFullYear().toString().slice(-2);
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = date.getHours();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const hour12 = hours % 12 || 12;
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            
-            return `${year}.${month}.${day} ${ampm} ${String(hour12).padStart(2, '0')}:${minutes}:${seconds}`;
-        }
-
-        // Load user data from Google Sheets
-        async function loadUserData() {
-            const userId = getUserIdFromUrl();
-            if (!userId) {
-                alert('사용자 ID가 없습니다. URL을 확인해주세요.');
-                elements.loadingScreen.style.display = 'none';
-                return;
+                this.elements = this.cacheElements();
+                this.init();
             }
 
-            state.userId = userId;
+            cacheElements() {
+                return {
+                    container: document.getElementById('canvas-container'),
+                    resultDisplay: document.getElementById('result-display'),
+                    rollButton: document.getElementById('rollButton'),
+                    diceColorInput: document.getElementById('diceColor'),
+                    dotColorInput: document.getElementById('dotColor'),
+                    scoreValue: document.getElementById('scoreValue'),
+                    userName: document.getElementById('userName'),
+                    coinCount: document.getElementById('coinCount'),
+                    loadingScreen: document.getElementById('loading-screen'),
+                    nextButton: document.getElementById('nextButton')
+                };
+            }
 
-            try {
-                console.log('Loading user data for ID:', userId);
-                console.log('Apps Script URL:', APPS_SCRIPT_URL);
+            init() {
+                this.bindEvents();
+                this.loadUserData().then(() => this.createDice());
+            }
+
+            bindEvents() {
+                this.elements.rollButton.addEventListener('click', () => this.rollDice());
+                this.elements.diceColorInput.addEventListener('change', () => this.updateSettings());
+                this.elements.dotColorInput.addEventListener('change', () => this.updateSettings());
+            }
+
+            // User Management
+            getUserIdFromUrl() {
+                return new URLSearchParams(window.location.search).get('id');
+            }
+
+            formatDate(date) {
+                const pad = (n) => String(n).padStart(2, '0');
+                const year = date.getFullYear().toString().slice(-2);
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                const hours = date.getHours();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const hour12 = pad(hours % 12 || 12);
+                const minutes = pad(date.getMinutes());
+                const seconds = pad(date.getSeconds());
                 
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: JSON.stringify({
-                        action: 'loadUser',
-                        userId: userId
-                    })
+                return `${year}.${month}.${day} ${ampm} ${hour12}:${minutes}:${seconds}`;
+            }
+
+            async loadUserData() {
+                const userId = this.getUserIdFromUrl();
+                if (!userId) {
+                    alert('사용자 ID가 없습니다. URL을 확인해주세요.');
+                    this.elements.loadingScreen.style.display = 'none';
+                    return;
+                }
+
+                this.state.userId = userId;
+
+                return new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    const callbackName = `callback_${Date.now()}`;
+                    
+                    window[callbackName] = (result) => {
+                        if (result.status === 'success') {
+                            this.updateStateFromData(result.data);
+                            console.log('User data loaded successfully');
+                        } else if (result.status === 'not_found') {
+                            alert('사용자를 찾을 수 없습니다.');
+                        } else {
+                            console.error('Error loading user data:', result);
+                            alert('데이터를 불러오는 중 오류가 발생했습니다.');
+                        }
+                        
+                        this.elements.loadingScreen.style.display = 'none';
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        resolve();
+                    };
+                    
+                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                    document.body.appendChild(script);
+                    
+                    setTimeout(() => {
+                        if (window[callbackName]) {
+                            console.error('Request timeout');
+                            alert('서버 응답 시간이 초과되었습니다.');
+                            this.elements.loadingScreen.style.display = 'none';
+                            delete window[callbackName];
+                            if (script.parentNode) document.body.removeChild(script);
+                            resolve();
+                        }
+                    }, CONFIG.TIMEOUT_DURATION);
+                });
+            }
+
+            updateStateFromData(data) {
+                this.state.userName = data.User_Name;
+                this.state.stats.cumulativeScore = parseInt(data.Roll_Sum) || 0;
+                this.state.stats.rollCount = parseInt(data.Roll_Count) || 0;
+                this.state.stats.rollTri = parseInt(data.Roll_Tri) || 0;
+                this.state.stats.rollStr = parseInt(data.Roll_Str) || 0;
+                this.state.stats.rollDou = parseInt(data.Roll_Dou) || 0;
+                this.state.stats.coinCount = parseInt(data.Coin_Count) || 0;
+                this.state.isBattle = data.IsBattle === 'TRUE' || data.IsBattle === true;
+                this.state.initialDate = data.Initial_Date;
+                this.state.isFirstRoll = !this.state.initialDate;
+                
+                this.elements.userName.textContent = this.state.userName;
+                this.elements.scoreValue.textContent = this.state.stats.cumulativeScore;
+                this.elements.coinCount.textContent = this.state.stats.coinCount;
+                
+                // Battle 버튼 표시/숨김
+                if (this.state.isBattle) {
+                    this.elements.nextButton.style.display = 'block';
+                } else {
+                    this.elements.nextButton.style.display = 'none';
+                }
+            }
+
+            async saveUserData() {
+                const currentDate = this.formatDate(new Date());
+                const params = new URLSearchParams({
+                    action: 'updateUser',
+                    userId: this.state.userId,
+                    ...this.state.stats,
+                    lastDate: currentDate,
+                    ...(this.state.isFirstRoll && { initialDate: currentDate })
                 });
 
-                // no-cors 모드에서는 response를 읽을 수 없으므로 다른 방법 사용
-                // JSONP 방식으로 변경
+                if (this.state.isFirstRoll) {
+                    this.state.isFirstRoll = false;
+                }
+
                 const script = document.createElement('script');
-                const callbackName = 'callback_' + Date.now();
-                
-                window[callbackName] = (result) => {
-                    console.log('Received data:', result);
-                    
-                    if (result.status === 'success') {
-                        const data = result.data;
-                        state.userName = data.User_Name;
-                        state.cumulativeScore = parseInt(data.Roll_Sum) || 0;
-                        state.rollCount = parseInt(data.Roll_Count) || 0;
-                        state.rollTri = parseInt(data.Roll_Tri) || 0;
-                        state.rollStr = parseInt(data.Roll_Str) || 0;
-                        state.rollDou = parseInt(data.Roll_Dou) || 0;
-                        state.initialDate = data.Initial_Date;
-                        state.isFirstRoll = !state.initialDate;
-                        
-                        elements.userName.textContent = state.userName;
-                        elements.scoreValue.textContent = state.cumulativeScore;
-                        
-                        console.log('User data loaded successfully');
-                    } else if (result.status === 'not_found') {
-                        alert('사용자를 찾을 수 없습니다.');
-                    } else {
-                        console.error('Error loading user data:', result);
-                        alert('데이터를 불러오는 중 오류가 발생했습니다.');
-                    }
-                    
-                    elements.loadingScreen.style.display = 'none';
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                };
-                
-                script.src = `${APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                script.src = `${CONFIG.APPS_SCRIPT_URL}?${params}`;
                 document.body.appendChild(script);
                 
-                // Timeout 처리
                 setTimeout(() => {
-                    if (window[callbackName]) {
-                        console.error('Request timeout');
-                        alert('서버 응답 시간이 초과되었습니다.');
-                        elements.loadingScreen.style.display = 'none';
-                        delete window[callbackName];
-                        if (script.parentNode) {
-                            document.body.removeChild(script);
+                    if (script.parentNode) document.body.removeChild(script);
+                }, 1000);
+            }
+
+            // Dice Management
+            createDot(color) {
+                const dot = document.createElement('div');
+                dot.className = 'dice-dot';
+                dot.style.backgroundColor = color;
+                return dot;
+            }
+
+            createDiceFace(value) {
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `dice-content dots-${value}`;
+                
+                for (let i = 0; i < value; i++) {
+                    contentDiv.appendChild(this.createDot(this.state.dotColor));
+                }
+                
+                return contentDiv;
+            }
+
+            createDiceElement() {
+                const diceDiv = document.createElement('div');
+                diceDiv.className = 'dice';
+                
+                const faceDiv = document.createElement('div');
+                faceDiv.className = 'dice-face';
+                faceDiv.style.backgroundColor = this.state.diceColor;
+                
+                const contentDiv = this.createDiceFace(1);
+                
+                faceDiv.appendChild(contentDiv);
+                diceDiv.appendChild(faceDiv);
+                
+                return {
+                    element: diceDiv,
+                    face: faceDiv,
+                    content: contentDiv,
+                    value: 1
+                };
+            }
+
+            createDice() {
+                // Clear existing dice
+                this.state.diceElements.forEach(dice => dice.element.remove());
+                this.state.diceElements = [];
+                
+                // Create new dice
+                for (let i = 0; i < CONFIG.DICE_COUNT; i++) {
+                    const dice = this.createDiceElement();
+                    this.elements.container.appendChild(dice.element);
+                    this.state.diceElements.push(dice);
+                }
+            }
+
+            updateDiceFace(dice, value) {
+                dice.value = value;
+                dice.content.remove();
+                dice.content = this.createDiceFace(value);
+                dice.face.appendChild(dice.content);
+            }
+
+            // Game Logic
+            checkCombinations(results) {
+                const counts = {};
+                const indices = {};
+                
+                results.forEach((num, index) => {
+                    counts[num] = (counts[num] || 0) + 1;
+                    indices[num] = indices[num] || [];
+                    indices[num].push(index);
+                });
+                
+                // Priority: Triple > Straight > Double
+                const combos = [
+                    { type: 'TRIPLE', minCount: 3 },
+                    { type: 'DOUBLE', minCount: 2 }
+                ];
+                
+                for (const combo of combos) {
+                    for (const num in counts) {
+                        if (counts[num] >= combo.minCount) {
+                            return { 
+                                type: combo.type, 
+                                indices: indices[num].slice(0, combo.minCount),
+                                values: Array(combo.minCount).fill(parseInt(num))
+                            };
                         }
                     }
-                }, 10000);
-                
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                alert('데이터를 불러오는 중 오류가 발생했습니다.\n' + error.message);
-                elements.loadingScreen.style.display = 'none';
-            }
-        }
-
-        // Save user data to Google Sheets
-        async function saveUserData() {
-            try {
-                const currentDate = formatDate(new Date());
-                
-                const data = {
-                    action: 'updateUser',
-                    userId: state.userId,
-                    rollCount: state.rollCount,
-                    rollTri: state.rollTri,
-                    rollStr: state.rollStr,
-                    rollDou: state.rollDou,
-                    rollSum: state.cumulativeScore,
-                    lastDate: currentDate
-                };
-
-                if (state.isFirstRoll) {
-                    data.initialDate = currentDate;
-                    state.isFirstRoll = false;
-                }
-
-                console.log('Saving user data:', data);
-
-                // JSONP 방식으로 저장
-                const script = document.createElement('script');
-                const params = new URLSearchParams(data).toString();
-                script.src = `${APPS_SCRIPT_URL}?${params}`;
-                document.body.appendChild(script);
-                
-                setTimeout(() => {
-                    if (script.parentNode) {
-                        document.body.removeChild(script);
+                    
+                    // Check straight after triple
+                    if (combo.type === 'TRIPLE') {
+                        const straight = this.checkStraight(results);
+                        if (straight) return straight;
                     }
-                }, 1000);
-                
-            } catch (error) {
-                console.error('Error saving user data:', error);
-            }
-        }
-
-        // Utility Functions
-        const createDot = (color) => {
-            const dot = document.createElement('div');
-            dot.className = 'dice-dot';
-            dot.style.backgroundColor = color;
-            return dot;
-        };
-
-        const createDiceFace = (value, diceColor, dotColor) => {
-            const contentDiv = document.createElement('div');
-            contentDiv.className = `dice-content dots-${value}`;
-            
-            for (let i = 0; i < value; i++) {
-                contentDiv.appendChild(createDot(dotColor));
-            }
-            
-            return contentDiv;
-        };
-
-        const createDiceElement = (index) => {
-            const diceDiv = document.createElement('div');
-            diceDiv.className = 'dice';
-            
-            const faceDiv = document.createElement('div');
-            faceDiv.className = 'dice-face';
-            faceDiv.style.backgroundColor = state.diceColor;
-            
-            const contentDiv = createDiceFace(1, state.diceColor, state.dotColor);
-            
-            faceDiv.appendChild(contentDiv);
-            diceDiv.appendChild(faceDiv);
-            
-            return {
-                element: diceDiv,
-                face: faceDiv,
-                content: contentDiv,
-                value: 1
-            };
-        };
-
-        // Dice Management
-        const updateDiceFace = (dice, value) => {
-            dice.value = value;
-            dice.content.remove();
-            dice.content = createDiceFace(value, state.diceColor, state.dotColor);
-            dice.face.appendChild(dice.content);
-        };
-
-        const createDice = () => {
-            // Clear existing dice
-            state.diceElements.forEach(dice => dice.element.remove());
-            state.diceElements = [];
-            
-            // Create new dice
-            for (let i = 0; i < state.diceCount; i++) {
-                const dice = createDiceElement(i);
-                elements.container.appendChild(dice.element);
-                state.diceElements.push(dice);
-            }
-        };
-
-        // Combination Detection
-        const checkCombinations = (results) => {
-            const counts = {};
-            const indices = {};
-            
-            // Count occurrences and track indices
-            results.forEach((num, index) => {
-                counts[num] = (counts[num] || 0) + 1;
-                if (!indices[num]) indices[num] = [];
-                indices[num].push(index);
-            });
-            
-            // Check for triple (highest priority)
-            for (const num in counts) {
-                if (counts[num] >= 3) {
-                    return { 
-                        type: 'TRIPLE', 
-                        indices: indices[num].slice(0, 3),
-                        values: Array(3).fill(parseInt(num))
-                    };
                 }
+                
+                return null;
             }
-            
-            // Check for straight (second priority)
-            if (results.length >= 3) {
+
+            checkStraight(results) {
+                if (results.length < 3) return null;
+                
                 const sortedWithIndex = results
                     .map((value, index) => ({ value, index }))
                     .sort((a, b) => a.value - b.value);
                 
                 for (let start = 0; start <= sortedWithIndex.length - 3; start++) {
-                    const straightIndices = [sortedWithIndex[start].index];
-                    const straightValues = [sortedWithIndex[start].value];
+                    const values = [];
+                    const indices = [];
                     let isConsecutive = true;
                     
-                    for (let i = 1; i < 3 && start + i < sortedWithIndex.length; i++) {
-                        if (sortedWithIndex[start + i].value !== sortedWithIndex[start].value + i) {
+                    for (let i = 0; i < 3 && start + i < sortedWithIndex.length; i++) {
+                        if (i > 0 && sortedWithIndex[start + i].value !== sortedWithIndex[start].value + i) {
                             isConsecutive = false;
                             break;
                         }
-                        straightIndices.push(sortedWithIndex[start + i].index);
-                        straightValues.push(sortedWithIndex[start + i].value);
+                        values.push(sortedWithIndex[start + i].value);
+                        indices.push(sortedWithIndex[start + i].index);
                     }
                     
-                    if (isConsecutive) {
-                        return { 
-                            type: 'STRAIGHT', 
-                            indices: straightIndices,
-                            values: straightValues
-                        };
+                    if (isConsecutive && values.length === 3) {
+                        return { type: 'STRAIGHT', indices, values };
                     }
                 }
-            }
-            
-            // Check for double (lowest priority)
-            for (const num in counts) {
-                if (counts[num] >= 2) {
-                    return { 
-                        type: 'DOUBLE', 
-                        indices: indices[num].slice(0, 2),
-                        values: Array(2).fill(parseInt(num))
-                    };
-                }
-            }
-            
-            return null;
-        };
-
-        // Animation Functions
-        const clearHighlights = () => {
-            state.diceElements.forEach(dice => {
-                dice.element.className = 'dice';
-            });
-        };
-
-        const applyHighlights = (combo) => {
-            const comboInfo = COMBO_TYPES[combo.type];
-            combo.indices.forEach(index => {
-                state.diceElements[index].element.classList.add(comboInfo.highlight);
-            });
-        };
-
-        const animateRoll = () => {
-            return new Promise(resolve => {
-                let elapsed = 0;
                 
-                const interval = setInterval(() => {
-                    state.diceElements.forEach((dice, index) => {
-                        const randomValue = Math.floor(Math.random() * DICE_FACES) + 1;
-                        updateDiceFace(dice, randomValue);
-                    });
+                return null;
+            }
+
+            // Animation
+            clearHighlights() {
+                this.state.diceElements.forEach(dice => {
+                    dice.element.className = 'dice';
+                });
+            }
+
+            applyHighlights(combo) {
+                const comboInfo = CONFIG.COMBO_TYPES[combo.type];
+                combo.indices.forEach(index => {
+                    this.state.diceElements[index].element.classList.add(comboInfo.highlight);
+                });
+            }
+
+            animateRoll() {
+                return new Promise(resolve => {
+                    let elapsed = 0;
                     
-                    elapsed += ROLL_INTERVAL;
-                    if (elapsed >= ROLL_DURATION) {
-                        clearInterval(interval);
-                        resolve();
-                    }
-                }, ROLL_INTERVAL);
-            });
-        };
+                    const interval = setInterval(() => {
+                        this.state.diceElements.forEach(dice => {
+                            const randomValue = Math.floor(Math.random() * CONFIG.DICE_FACES) + 1;
+                            this.updateDiceFace(dice, randomValue);
+                        });
+                        
+                        elapsed += CONFIG.ROLL_INTERVAL;
+                        if (elapsed >= CONFIG.ROLL_DURATION) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, CONFIG.ROLL_INTERVAL);
+                });
+            }
 
-        // Main Functions
-        const showResult = async (results) => {
-            const total = results.reduce((sum, val) => sum + val, 0);
-            state.cumulativeScore += total;
-            state.rollCount++;
-            
-            const combo = checkCombinations(results);
-            
-            // Update combo counts
-            if (combo) {
-                switch(combo.type) {
-                    case 'TRIPLE':
-                        state.rollTri++;
-                        break;
-                    case 'STRAIGHT':
-                        state.rollStr++;
-                        break;
-                    case 'DOUBLE':
-                        state.rollDou++;
-                        break;
+            // Main Game Functions
+            async showResult(results) {
+                const total = results.reduce((sum, val) => sum + val, 0);
+                this.state.stats.cumulativeScore += total;
+                this.state.stats.rollCount++;
+                
+                const combo = this.checkCombinations(results);
+                
+                if (combo) {
+                    const comboKey = `roll${combo.type.charAt(0) + combo.type.slice(1).toLowerCase()}`;
+                    this.state.stats[comboKey]++;
                 }
+                
+                this.displayResult(total, combo);
+                this.elements.scoreValue.textContent = this.state.stats.cumulativeScore;
+                
+                await this.saveUserData();
             }
-            
-            let displayHTML = `${total}`;
-            
-            if (combo) {
-                const comboInfo = COMBO_TYPES[combo.type];
-                const comboDetail = `(${combo.values.join(', ')})`;
-                displayHTML = `<span class="combo-detail">${comboDetail}</span><span class="combo-text ${comboInfo.class}">${comboInfo.text}</span>${total}`;
-                applyHighlights(combo);
+
+            displayResult(total, combo) {
+                let displayHTML = `${total}`;
+                
+                if (combo) {
+                    const comboInfo = CONFIG.COMBO_TYPES[combo.type];
+                    const comboDetail = `(${combo.values.join(', ')})`;
+                    displayHTML = `<span class="combo-detail">${comboDetail}</span><span class="combo-text ${comboInfo.class}">${comboInfo.text}</span>${total}`;
+                    this.applyHighlights(combo);
+                }
+                
+                this.elements.resultDisplay.innerHTML = displayHTML;
+                this.elements.resultDisplay.classList.add('show');
             }
-            
-            elements.resultDisplay.innerHTML = displayHTML;
-            elements.resultDisplay.classList.add('show');
-            
-            // Update cumulative score display
-            elements.scoreValue.textContent = state.cumulativeScore;
-            
-            // Save to Google Sheets
-            await saveUserData();
-        };
 
-        const rollDice = async () => {
-            if (state.isRolling) return;
-            
-            state.isRolling = true;
-            elements.rollButton.disabled = true;
-            elements.resultDisplay.classList.remove('show');
-            
-            // Clear highlights and start rolling
-            clearHighlights();
-            state.diceElements.forEach(dice => dice.element.classList.add('rolling'));
-            
-            // Animate roll
-            await animateRoll();
-            
-            // Generate final results
-            const results = state.diceElements.map(dice => {
-                dice.element.classList.remove('rolling');
-                const finalValue = Math.floor(Math.random() * DICE_FACES) + 1;
-                updateDiceFace(dice, finalValue);
-                return finalValue;
-            });
-            
-            // Show results
-            await showResult(results);
-            
-            state.isRolling = false;
-            elements.rollButton.disabled = false;
-        };
+            async rollDice() {
+                if (this.state.isRolling) return;
+                
+                this.state.isRolling = true;
+                this.elements.rollButton.disabled = true;
+                this.elements.resultDisplay.classList.remove('show');
+                
+                // Clear highlights and start rolling
+                this.clearHighlights();
+                this.state.diceElements.forEach(dice => dice.element.classList.add('rolling'));
+                
+                // Animate roll
+                await this.animateRoll();
+                
+                // Generate final results
+                const results = this.state.diceElements.map(dice => {
+                    dice.element.classList.remove('rolling');
+                    const finalValue = Math.floor(Math.random() * CONFIG.DICE_FACES) + 1;
+                    this.updateDiceFace(dice, finalValue);
+                    return finalValue;
+                });
+                
+                // Show results
+                await this.showResult(results);
+                
+                this.state.isRolling = false;
+                this.elements.rollButton.disabled = false;
+            }
 
-        const updateSettings = () => {
-            state.diceColor = elements.diceColorInput.value;
-            state.dotColor = elements.dotColorInput.value;
-            createDice();
-        };
+            updateSettings() {
+                this.state.diceColor = this.elements.diceColorInput.value;
+                this.state.dotColor = this.elements.dotColorInput.value;
+                this.createDice();
+            }
+        }
 
-        // Event Listeners
-        elements.rollButton.addEventListener('click', rollDice);
-        elements.diceColorInput.addEventListener('change', updateSettings);
-        elements.dotColorInput.addEventListener('change', updateSettings);
+        // Next page navigation
+        function goToNextPage() {
+            const userId = new URLSearchParams(window.location.search).get('id');
+            if (userId) {
+                window.location.href = `page2.html?id=${userId}`;
+            } else {
+                window.location.href = 'page2.html';
+            }
+        }
 
-        // Initialize
-        window.addEventListener('load', async () => {
-            await loadUserData();
-            createDice();
+        // Initialize when DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            new DiceSimulator();
         });
     </script>
 </body>
-</html>[num] = (counts
+</html>
