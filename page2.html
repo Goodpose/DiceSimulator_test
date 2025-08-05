@@ -18,20 +18,10 @@
             --bg-medium: #2a2a2a;
             --bg-light: #242424;
             --border-color: #444;
-            --double-color: #FFD700;
-            --triple-color: #FF6B6B;
-            --straight-color: #4ECDC4;
             --dice-size: 100px;
             --dice-size-mobile: 80px;
             --dot-size: 16px;
             --dot-size-mobile: 12px;
-            --animation-duration: 1s;
-            
-            /* Dice color options */
-            --color-red: #E7322F;
-            --color-blue: #3398D4;
-            --color-purple: #CB69E4;
-            --color-green: #5CCB96;
         }
 
         body {
@@ -44,366 +34,85 @@
 
         /* Loading Screen */
         #loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            position: fixed; inset: 0; background: var(--bg-dark); display: flex;
+            flex-direction: column; align-items: center; justify-content: center; z-index: 1000;
         }
-
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 50px; height: 50px; border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #888;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 20px; font-size: 18px; color: #888; }
 
         /* Main Container */
         #canvas-container {
-            width: 100vw;
-            height: 60vh;
-            position: relative;
+            width: 100vw; height: 60vh; position: relative;
             background: radial-gradient(ellipse at center, var(--bg-medium) 0%, var(--bg-dark) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px 20px;
+            display: flex; align-items: center; justify-content: center; padding: 80px 20px 20px;
         }
 
         /* Result Display */
         #result-display {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px 40px;
-            border-radius: 30px;
-            font: bold 36px 'Russo One', sans-serif;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            min-width: 150px;
-            text-align: center;
-            transition: all 0.3s ease;
-            z-index: 10;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); padding: 20px 40px; border-radius: 30px;
+            font: bold 36px 'Russo One', sans-serif; backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1); min-width: 150px; text-align: center;
+            transition: all 0.3s ease; z-index: 10; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
-
         #result-display.show {
             animation: pulse 0.5s ease;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 30px rgba(102, 126, 234, 0.6);
+            border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 4px 30px rgba(102, 126, 234, 0.6);
         }
 
-        /* User Info */
-        #user-info {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #888;
-            backdrop-filter: blur(10px);
+        /* User Info & Coin Display */
+        #user-info, #coin-display {
+            position: absolute; top: 20px; background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px);
         }
-
-        #user-info span {
-            color: #fff;
-            font-weight: bold;
-        }
-
-        /* Coin Display */
+        #user-info { right: 20px; font-size: 14px; color: #888; }
+        #user-info span { color: #fff; font-weight: bold; }
         #coin-display {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 16px;
-            color: #fff;
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            left: 20px; font-size: 16px; color: #fff; display: flex;
+            align-items: center; gap: 10px; font-weight: bold; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-
         .coin-icon {
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle at 35% 35%, #ffd700, #ffb300);
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 
-                0 2px 5px rgba(0, 0, 0, 0.3),
-                inset -2px -2px 5px rgba(0, 0, 0, 0.2),
-                inset 2px 2px 5px rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #b8860b;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            width: 30px; height: 30px; background: radial-gradient(circle at 35% 35%, #ffd700, #ffb300);
+            border-radius: 50%; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(0,0,0,0.2), inset 2px 2px 5px rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; color: #b8860b;
+            font-weight: bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
-
-        .coin-count {
-            font-family: 'Russo One', sans-serif;
-            font-size: 20px;
-            color: #ffd700;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
+        .coin-count { font-family: 'Russo One', sans-serif; font-size: 20px; color: #ffd700; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); }
 
         /* Back Button */
         #backButton {
-            position: fixed;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            z-index: 100;
+            position: fixed; left: 20px; top: 50%; transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;
+            padding: 15px 30px; border-radius: 25px; color: white; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); z-index: 100;
         }
-
-        #backButton:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        #backButton:active {
-            transform: translateY(-50%) scale(0.95);
-        }
+        #backButton:hover { transform: translateY(-50%) scale(1.05); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+        #backButton:active { transform: translateY(-50%) scale(0.95); }
 
         /* Animations */
-        @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.1); }
-        }
-
-        @keyframes roll {
-            0%, 100% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(90deg) scale(0.9); }
-            50% { transform: rotate(180deg) scale(1); }
-            75% { transform: rotate(270deg) scale(0.9); }
-        }
+        @keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.1); } }
+        @keyframes roll { 0%, 100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(90deg) scale(0.9); } 50% { transform: rotate(180deg) scale(1); } 75% { transform: rotate(270deg) scale(0.9); } }
 
         /* Dice Styles */
-        .dice {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .dice.rolling {
-            animation: roll 0.5s ease-in-out infinite;
-        }
-
+        .dice { position: relative; transition: all 0.3s ease; }
+        .dice.rolling { animation: roll 0.5s ease-in-out infinite; }
         .dice-face {
-            width: var(--dice-size);
-            height: var(--dice-size);
-            background: #fff;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            transition: all 0.3s ease;
+            width: var(--dice-size); height: var(--dice-size); background: #fff;
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); position: relative; transition: all 0.3s ease;
         }
-
-        .dice-dot {
-            width: var(--dot-size);
-            height: var(--dot-size);
-            background: #000;
-            border-radius: 50%;
-            position: absolute;
-        }
-
-        .dice-content {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
+        .dice-dot { width: var(--dot-size); height: var(--dot-size); background: #000; border-radius: 50%; position: absolute; }
+        .dice-content { position: relative; width: 100%; height: 100%; }
 
         /* Dot Patterns */
-        .dots-1 .dice-dot { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .dots-1 .dice-dot:nth-child(1){top:50%;left:50%;transform:translate(-50%,-50%)}.dots-2 .dice-dot:nth-child(1){top:25%;left:25%}.dots-2 .dice-dot:nth-child(2){bottom:25%;right:25%}.dots-3 .dice-dot:nth-child(1){top:20%;left:20%}.dots-3 .dice-dot:nth-child(2){top:50%;left:50%;transform:translate(-50%,-50%)}.dots-3 .dice-dot:nth-child(3){bottom:20%;right:20%}.dots-4 .dice-dot:nth-child(1){top:25%;left:25%}.dots-4 .dice-dot:nth-child(2){top:25%;right:25%}.dots-4 .dice-dot:nth-child(3){bottom:25%;left:25%}.dots-4 .dice-dot:nth-child(4){bottom:25%;right:25%}.dots-5 .dice-dot:nth-child(1){top:20%;left:20%}.dots-5 .dice-dot:nth-child(2){top:20%;right:20%}.dots-5 .dice-dot:nth-child(3){top:50%;left:50%;transform:translate(-50%,-50%)}.dots-5 .dice-dot:nth-child(4){bottom:20%;left:20%}.dots-5 .dice-dot:nth-child(5){bottom:20%;right:20%}.dots-6 .dice-dot:nth-child(1){top:20%;left:20%}.dots-6 .dice-dot:nth-child(2){top:20%;right:20%}.dots-6 .dice-dot:nth-child(3){top:50%;left:20%;transform:translateY(-50%)}.dots-6 .dice-dot:nth-child(4){top:50%;right:20%;transform:translateY(-50%)}.dots-6 .dice-dot:nth-child(5){bottom:20%;left:20%}.dots-6 .dice-dot:nth-child(6){bottom:20%;right:20%}
 
-        .dots-2 .dice-dot:nth-child(1) { top: 25%; left: 25%; }
-        .dots-2 .dice-dot:nth-child(2) { bottom: 25%; right: 25%; }
-
-        .dots-3 .dice-dot { top: 20%; left: 20%; }
-        .dots-3 .dice-dot:nth-child(2) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .dots-3 .dice-dot:nth-child(3) { top: auto; bottom: 20%; left: auto; right: 20%; }
-
-        .dots-4 .dice-dot { top: 25%; left: 25%; }
-        .dots-4 .dice-dot:nth-child(2) { left: auto; right: 25%; }
-        .dots-4 .dice-dot:nth-child(3) { top: auto; bottom: 25%; }
-        .dots-4 .dice-dot:nth-child(4) { top: auto; bottom: 25%; left: auto; right: 25%; }
-
-        .dots-5 .dice-dot { top: 20%; left: 20%; }
-        .dots-5 .dice-dot:nth-child(2) { left: auto; right: 20%; }
-        .dots-5 .dice-dot:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .dots-5 .dice-dot:nth-child(4) { top: auto; bottom: 20%; }
-        .dots-5 .dice-dot:nth-child(5) { top: auto; bottom: 20%; left: auto; right: 20%; }
-
-        .dots-6 .dice-dot { top: 20%; left: 25%; }
-        .dots-6 .dice-dot:nth-child(2) { left: auto; right: 25%; }
-        .dots-6 .dice-dot:nth-child(3) { top: 50%; transform: translateY(-50%); }
-        .dots-6 .dice-dot:nth-child(4) { top: 50%; left: auto; right: 25%; transform: translateY(-50%); }
-        .dots-6 .dice-dot:nth-child(5) { top: auto; bottom: 20%; }
-        .dots-6 .dice-dot:nth-child(6) { top: auto; bottom: 20%; left: auto; right: 25%; }
-
-        /* Dice Slots */
-        .dice-slots-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            aspect-ratio: 1;
-            position: relative;
-        }
-
-        .dice-slot {
-            background: var(--bg-dark);
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: all 0.3s ease;
-            min-height: 80px;
-        }
-
-        .dice-slot.slot-s3 {
-            grid-column: 2;
-            grid-row: 1;
-        }
-
-        .dice-slot.slot-s1 {
-            grid-column: 1;
-            grid-row: 2;
-        }
-
-        .dice-slot.slot-s2 {
-            grid-column: 2;
-            grid-row: 2;
-        }
-
-        .dice-slot.slot-s6 {
-            grid-column: 3;
-            grid-row: 2;
-        }
-
-        .dice-slot.slot-s5 {
-            grid-column: 4;
-            grid-row: 2;
-        }
-
-        .dice-slot.slot-s4 {
-            grid-column: 2;
-            grid-row: 3;
-        }
-
-        .slot-label {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 10px;
-            color: #666;
-            font-weight: bold;
-        }
-
-        .slot-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        .mini-dice {
-            width: 50px;
-            height: 50px;
-            background: #fff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .mini-dice-dot {
-            width: 8px;
-            height: 8px;
-            background: #000;
-            border-radius: 50%;
-            position: absolute;
-        }
-
-        .slot-text {
-            font-size: 18px;
-            color: #888;
-            font-weight: bold;
-        }
-
-        /* Mini dice dot patterns */
-        .mini-dots-1 .mini-dice-dot { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
-        .mini-dots-2 .mini-dice-dot:nth-child(1) { top: 25%; left: 25%; }
-        .mini-dots-2 .mini-dice-dot:nth-child(2) { bottom: 25%; right: 25%; }
-
-        .mini-dots-3 .mini-dice-dot { top: 20%; left: 20%; }
-        .mini-dots-3 .mini-dice-dot:nth-child(2) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .mini-dots-3 .mini-dice-dot:nth-child(3) { top: auto; bottom: 20%; left: auto; right: 20%; }
-
-        .mini-dots-4 .mini-dice-dot { top: 25%; left: 25%; }
-        .mini-dots-4 .mini-dice-dot:nth-child(2) { left: auto; right: 25%; }
-        .mini-dots-4 .mini-dice-dot:nth-child(3) { top: auto; bottom: 25%; }
-        .mini-dots-4 .mini-dice-dot:nth-child(4) { top: auto; bottom: 25%; left: auto; right: 25%; }
-
-        .mini-dots-5 .mini-dice-dot { top: 20%; left: 20%; }
-        .mini-dots-5 .mini-dice-dot:nth-child(2) { left: auto; right: 20%; }
-        .mini-dots-5 .mini-dice-dot:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .mini-dots-5 .mini-dice-dot:nth-child(4) { top: auto; bottom: 20%; }
-        .mini-dots-5 .mini-dice-dot:nth-child(5) { top: auto; bottom: 20%; left: auto; right: 20%; }
-
-        .mini-dots-6 .mini-dice-dot { top: 20%; left: 25%; }
-        .mini-dots-6 .mini-dice-dot:nth-child(2) { left: auto; right: 25%; }
-        .mini-dots-6 .mini-dice-dot:nth-child(3) { top: 50%; transform: translateY(-50%); }
-        .mini-dots-6 .mini-dice-dot:nth-child(4) { top: 50%; left: auto; right: 25%; transform: translateY(-50%); }
-        .mini-dots-6 .mini-dice-dot:nth-child(5) { top: auto; bottom: 20%; }
-        .mini-dots-6 .mini-dice-dot:nth-child(6) { top: auto; bottom: 20%; left: auto; right: 25%; }
-
-        /* Update grid layout */
+        /* [수정] Dice Slots Grid Layout: 불필요한/충돌하는 스타일을 제거하고 3x2 그리드로 정리 */
         .dice-slots-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -414,141 +123,61 @@
             margin: 0 auto;
         }
 
-        .dice-slot.slot-s1 { grid-column: 1; grid-row: 1; }
-        .dice-slot.slot-s2 { grid-column: 2; grid-row: 1; }
-        .dice-slot.slot-s3 { grid-column: 3; grid-row: 1; }
-        .dice-slot.slot-s6 { grid-column: 1; grid-row: 2; }
-        .dice-slot.slot-s5 { grid-column: 2; grid-row: 2; }
-        .dice-slot.slot-s4 { grid-column: 3; grid-row: 2; }
+        .dice-slot {
+            background: var(--bg-dark); border: 2px solid var(--border-color);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; position: relative; transition: all 0.3s ease;
+            min-height: 80px;
+        }
+        .slot-label { position: absolute; top: 5px; left: 5px; font-size: 10px; color: #666; font-weight: bold; }
+        .slot-content { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+
+        /* [수정] 각 슬롯의 위치를 올바른 3x2 그리드에 맞게 재지정 */
+        .slot-s1 { grid-area: 1 / 1; }
+        .slot-s2 { grid-area: 1 / 2; }
+        .slot-s3 { grid-area: 1 / 3; }
+        .slot-s4 { grid-area: 2 / 3; }
+        .slot-s5 { grid-area: 2 / 2; }
+        .slot-s6 { grid-area: 2 / 1; }
+
+        .mini-dice {
+            width: 50px; height: 50px; background: #fff; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .mini-dice-dot { width: 8px; height: 8px; background: #000; border-radius: 50%; position: absolute; }
+        .slot-text { font-size: 18px; color: #888; font-weight: bold; }
+
+        /* Mini dice dot patterns */
+        .mini-dots-1 .mini-dice-dot{top:50%;left:50%;transform:translate(-50%,-50%)}.mini-dots-2 .mini-dice-dot:nth-child(1){top:25%;left:25%}.mini-dots-2 .mini-dice-dot:nth-child(2){bottom:25%;right:25%}.mini-dots-3 .mini-dice-dot:nth-child(1){top:20%;left:20%}.mini-dots-3 .mini-dice-dot:nth-child(2){top:50%;left:50%;transform:translate(-50%,-50%)}.mini-dots-3 .mini-dice-dot:nth-child(3){bottom:20%;right:20%}.mini-dots-4 .mini-dice-dot:nth-child(1){top:25%;left:25%}.mini-dots-4 .mini-dice-dot:nth-child(2){top:25%;right:25%}.mini-dots-4 .mini-dice-dot:nth-child(3){bottom:25%;left:25%}.mini-dots-4 .mini-dice-dot:nth-child(4){bottom:25%;right:25%}.mini-dots-5 .mini-dice-dot:nth-child(1){top:20%;left:20%}.mini-dots-5 .mini-dice-dot:nth-child(2){top:20%;right:20%}.mini-dots-5 .mini-dice-dot:nth-child(3){top:50%;left:50%;transform:translate(-50%,-50%)}.mini-dots-5 .mini-dice-dot:nth-child(4){bottom:20%;left:20%}.mini-dots-5 .mini-dice-dot:nth-child(5){bottom:20%;right:20%}.mini-dots-6 .mini-dice-dot:nth-child(1){top:20%;left:20%}.mini-dots-6 .mini-dice-dot:nth-child(2){top:20%;right:20%}.mini-dots-6 .mini-dice-dot:nth-child(3){top:50%;left:20%;transform:translateY(-50%)}.mini-dots-6 .mini-dice-dot:nth-child(4){top:50%;right:20%;transform:translateY(-50%)}.mini-dots-6 .mini-dice-dot:nth-child(5){bottom:20%;left:20%}.mini-dots-6 .mini-dice-dot:nth-child(6){bottom:20%;right:20%}
+
+        /* Controls */
         .controls {
-            height: 40vh;
-            background: var(--bg-light);
-            padding: 20px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            height: 40vh; background: var(--bg-light); padding: 20px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-
-        .control-wrapper {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .control-group {
-            background: var(--bg-medium);
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .control-group h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #fff;
-            text-align: center;
-        }
-
-        .color-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .color-button {
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .color-button:hover {
-            transform: scale(1.05);
-        }
-
-        .color-button.active {
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            transform: scale(1.05);
-        }
-
-        .color-button.active::after {
-            content: '✓';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-        }
-
-        .color-red { background: var(--color-red); }
-        .color-blue { background: var(--color-blue); }
-        .color-purple { background: var(--color-purple); }
-        .color-green { background: var(--color-green); }
+        .control-wrapper { display: flex; margin-bottom: 20px; justify-content: center; }
+        .control-group { background: var(--bg-medium); padding: 15px; border-radius: 10px; width: 100%; max-width: 400px; }
+        .control-group h3 { font-size: 16px; margin-bottom: 15px; color: #fff; text-align: center; }
 
         #rollButton {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font: bold 20px/1 inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            width: 100%; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none; border-radius: 10px; color: white; font: bold 20px/1 inherit;
+            cursor: pointer; transition: all 0.3s ease; text-transform: uppercase;
+            letter-spacing: 2px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-
-        #rollButton:active {
-            transform: scale(0.95);
-        }
-
-        #rollButton:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        #rollButton:active { transform: scale(0.95); }
+        #rollButton:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Mobile Styles */
         @media (max-width: 600px) {
-            :root {
-                --dice-size: var(--dice-size-mobile);
-                --dot-size: var(--dot-size-mobile);
-            }
-            
-            #result-display {
-                font-size: 28px;
-                padding: 15px 30px;
-            }
-
+            :root { --dice-size: var(--dice-size-mobile); --dot-size: var(--dot-size-mobile); }
+            #result-display { font-size: 28px; padding: 15px 30px; }
             #user-info { font-size: 12px; padding: 8px 15px; }
-            
-            #coin-display {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-            
-            .coin-icon {
-                width: 24px;
-                height: 24px;
-                font-size: 14px;
-            }
-            
-            .coin-count {
-                font-size: 16px;
-            }
-            
-            #backButton {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
+            #coin-display { font-size: 12px; padding: 8px 15px; }
+            .coin-icon { width: 24px; height: 24px; font-size: 14px; }
+            .coin-count { font-size: 16px; }
+            #backButton { padding: 10px 20px; font-size: 14px; }
         }
     </style>
 </head>
@@ -567,73 +196,44 @@
         </div>
     </div>
     
-    <button id="backButton" onclick="goBack()">BACK</button>
+    <button id="backButton">BACK</button>
     
     <div class="controls">
         <div class="control-wrapper">
             <div class="control-group">
                 <h3>주사위 설정</h3>
                 <div class="dice-slots-grid">
-                    <div class="dice-slot slot-s1" id="slot-s1">
-                        <span class="slot-label">S1</span>
-                        <div class="slot-content"></div>
-                    </div>
-                    <div class="dice-slot slot-s2" id="slot-s2">
-                        <span class="slot-label">S2</span>
-                        <div class="slot-content"></div>
-                    </div>
-                    <div class="dice-slot slot-s3" id="slot-s3">
-                        <span class="slot-label">S3</span>
-                        <div class="slot-content"></div>
-                    </div>
-                    <div class="dice-slot slot-s6" id="slot-s6">
-                        <span class="slot-label">S6</span>
-                        <div class="slot-content"></div>
-                    </div>
-                    <div class="dice-slot slot-s5" id="slot-s5">
-                        <span class="slot-label">S5</span>
-                        <div class="slot-content"></div>
-                    </div>
-                    <div class="dice-slot slot-s4" id="slot-s4">
-                        <span class="slot-label">S4</span>
-                        <div class="slot-content"></div>
-                    </div>
+                    <div class="dice-slot slot-s1" id="slot-s1"><span class="slot-label">S1</span><div class="slot-content"></div></div>
+                    <div class="dice-slot slot-s2" id="slot-s2"><span class="slot-label">S2</span><div class="slot-content"></div></div>
+                    <div class="dice-slot slot-s3" id="slot-s3"><span class="slot-label">S3</span><div class="slot-content"></div></div>
+                    <div class="dice-slot slot-s4" id="slot-s4"><span class="slot-label">S4</span><div class="slot-content"></div></div>
+                    <div class="dice-slot slot-s5" id="slot-s5"><span class="slot-label">S5</span><div class="slot-content"></div></div>
+                    <div class="dice-slot slot-s6" id="slot-s6"><span class="slot-label">S6</span><div class="slot-content"></div></div>
                 </div>
             </div>
         </div>
-        
         <button id="rollButton">ROLL</button>
     </div>
 
     <script>
         'use strict';
-
-        // Configuration
-        const CONFIG = {
-            APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE',
-            ROLL_DURATION: 1000,
-            ROLL_INTERVAL: 100,
-            DICE_COUNT: 1,  // Fixed to 1 dice
-            DICE_FACES: 6,
-            TIMEOUT_DURATION: 10000
-        };
-
-        // Simplified Dice Simulator for Page 2
+        
         class DiceSimulatorPage2 {
             constructor() {
+                this.config = {
+                    APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE', // <-- 여기에 실제 URL을 입력하세요.
+                    ROLL_DURATION: 1000,
+                    ROLL_INTERVAL: 100,
+                    DICE_FACES: 6,
+                    TIMEOUT_DURATION: 10000
+                };
+
                 this.state = {
                     userId: null,
                     userName: null,
                     coinCount: 0,
                     rollEnable: 0,
-                    diceSlots: {
-                        s1: null,
-                        s2: null,
-                        s3: null,
-                        s4: null,
-                        s5: null,
-                        s6: null
-                    },
+                    diceSlots: { s1: null, s2: null, s3: null, s4: null, s5: null, s6: null },
                     isRolling: false,
                     diceElement: null
                 };
@@ -643,149 +243,123 @@
             }
 
             cacheElements() {
-                return {
+                const elements = {
                     container: document.getElementById('canvas-container'),
                     resultDisplay: document.getElementById('result-display'),
                     rollButton: document.getElementById('rollButton'),
                     userName: document.getElementById('userName'),
                     coinCount: document.getElementById('coinCount'),
                     loadingScreen: document.getElementById('loading-screen'),
-                    slots: {
-                        s1: document.getElementById('slot-s1'),
-                        s2: document.getElementById('slot-s2'),
-                        s3: document.getElementById('slot-s3'),
-                        s4: document.getElementById('slot-s4'),
-                        s5: document.getElementById('slot-s5'),
-                        s6: document.getElementById('slot-s6')
-                    }
+                    backButton: document.getElementById('backButton'),
+                    slots: {}
                 };
+                for (let i = 1; i <= 6; i++) {
+                    elements.slots[`s${i}`] = document.getElementById(`slot-s${i}`);
+                }
+                return elements;
             }
 
             init() {
                 this.bindEvents();
-                this.loadUserData().then(() => {
-                    this.createDice();
-                    this.loadDiceSettings();
-                });
+                this.initializeApp();
             }
 
             bindEvents() {
                 this.elements.rollButton.addEventListener('click', () => this.rollDice());
+                this.elements.backButton.addEventListener('click', () => this.goBack());
+            }
+            
+            // [개선] 네트워크 요청 래퍼 함수 (첫 페이지와 동일)
+            async fetchWithTimeout(resource, options = {}) {
+                const { timeout = this.config.TIMEOUT_DURATION } = options;
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                const response = await fetch(resource, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return response;
             }
 
-            // User Management
-            getUserIdFromUrl() {
-                return new URLSearchParams(window.location.search).get('id');
+            // [보안 수정] API 호출 함수 (첫 페이지와 동일)
+            async apiCall(action, payload = {}) {
+                try {
+                    const response = await this.fetchWithTimeout(this.config.APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action, ...payload }),
+                        redirect: 'follow'
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API call failed for action "${action}":`, error);
+                    if (error.name === 'AbortError') alert('서버 응답 시간이 초과되었습니다.');
+                    else alert('서버와 통신 중 오류가 발생했습니다.');
+                    return null;
+                }
             }
-
-            async loadUserData() {
-                const userId = this.getUserIdFromUrl();
+            
+            // [개선] 초기화 로직을 async/await로 명확하게 처리
+            async initializeApp() {
+                const userId = new URLSearchParams(window.location.search).get('id');
                 if (!userId) {
                     alert('사용자 ID가 없습니다. URL을 확인해주세요.');
                     this.elements.loadingScreen.style.display = 'none';
                     return;
                 }
-
                 this.state.userId = userId;
 
-                return new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    const callbackName = `callback_${Date.now()}`;
-                    
-                    window[callbackName] = (result) => {
-                        if (result.status === 'success') {
-                            this.state.userName = result.data.User_Name;
-                            this.state.coinCount = parseInt(result.data.Coin_Count) || 0;
-                            this.elements.userName.textContent = this.state.userName;
-                            this.elements.coinCount.textContent = this.state.coinCount;
-                            console.log('User data loaded successfully');
-                        } else if (result.status === 'not_found') {
-                            alert('사용자를 찾을 수 없습니다.');
-                        } else {
-                            console.error('Error loading user data:', result);
-                            alert('데이터를 불러오는 중 오류가 발생했습니다.');
-                        }
-                        
-                        this.elements.loadingScreen.style.display = 'none';
-                        delete window[callbackName];
-                        document.body.removeChild(script);
-                        resolve();
-                    };
-                    
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
-                    document.body.appendChild(script);
-                    
-                    setTimeout(() => {
-                        if (window[callbackName]) {
-                            console.error('Request timeout');
-                            alert('서버 응답 시간이 초과되었습니다.');
-                            this.elements.loadingScreen.style.display = 'none';
-                            delete window[callbackName];
-                            if (script.parentNode) document.body.removeChild(script);
-                            resolve();
-                        }
-                    }, CONFIG.TIMEOUT_DURATION);
-                });
-            }
+                // [개선] Promise.all을 사용해 유저 정보와 주사위 설정을 동시에 요청하여 로딩 시간 단축
+                const [userResult, diceSettingsResult] = await Promise.all([
+                    this.apiCall('loadUser', { userId }),
+                    this.apiCall('loadDiceSettings', { userId })
+                ]);
 
-            async loadDiceSettings() {
-                return new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    const callbackName = `callback_dice_${Date.now()}`;
-                    
-                    window[callbackName] = (result) => {
-                        if (result.status === 'success') {
-                            this.state.rollEnable = parseInt(result.data.Roll_Enable) || 0;
-                            
-                            // Update roll button
-                            if (this.state.rollEnable > 0) {
-                                this.elements.rollButton.textContent = `ROLL (${this.state.rollEnable})`;
-                                this.elements.rollButton.disabled = false;
-                            } else {
-                                this.elements.rollButton.textContent = 'ROLL (0)';
-                                this.elements.rollButton.disabled = true;
-                            }
-                            
-                            // Update dice slots
-                            for (let i = 1; i <= 6; i++) {
-                                const slotKey = `s${i}`;
-                                const diceValue = result.data[`Dice_S${i}`];
-                                this.state.diceSlots[slotKey] = diceValue;
-                                this.updateSlot(slotKey, diceValue);
-                            }
-                        }
-                        
-                        delete window[callbackName];
-                        document.body.removeChild(script);
-                        resolve();
-                    };
-                    
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadDiceSettings&userId=${this.state.userId}`;
-                    document.body.appendChild(script);
-                });
+                // 유저 정보 처리
+                if (userResult && userResult.status === 'success') {
+                    this.state.userName = userResult.data.User_Name;
+                    this.state.coinCount = parseInt(userResult.data.Coin_Count) || 0;
+                    this.elements.userName.textContent = this.state.userName;
+                    this.elements.coinCount.textContent = this.state.coinCount.toLocaleString();
+                } else {
+                    alert('사용자 정보를 불러오는 데 실패했습니다.');
+                }
+
+                // 주사위 설정 처리
+                if (diceSettingsResult && diceSettingsResult.status === 'success') {
+                    this.state.rollEnable = parseInt(diceSettingsResult.data.Roll_Enable) || 0;
+                    this.updateRollButton();
+                    for (let i = 1; i <= 6; i++) {
+                        const slotKey = `s${i}`;
+                        const diceValue = diceSettingsResult.data[`Dice_S${i}`];
+                        this.state.diceSlots[slotKey] = diceValue;
+                        this.updateSlot(slotKey, diceValue);
+                    }
+                } else {
+                     alert('주사위 설정을 불러오는 데 실패했습니다.');
+                }
+                
+                this.createDice();
+                this.elements.loadingScreen.style.display = 'none';
             }
 
             updateSlot(slotKey, value) {
                 const slot = this.elements.slots[slotKey];
                 if (!slot) return;
-                
                 const content = slot.querySelector('.slot-content');
                 content.innerHTML = '';
                 
                 if (value >= 1 && value <= 6) {
-                    // Create mini dice
                     const miniDice = document.createElement('div');
                     miniDice.className = `mini-dice mini-dots-${value}`;
-                    
+                    const fragment = document.createDocumentFragment();
                     for (let i = 0; i < value; i++) {
                         const dot = document.createElement('div');
                         dot.className = 'mini-dice-dot';
-                        miniDice.appendChild(dot);
+                        fragment.appendChild(dot);
                     }
-                    
+                    miniDice.appendChild(fragment);
                     content.appendChild(miniDice);
                 } else if (value) {
-                    // Show text for non-dice values
                     const text = document.createElement('div');
                     text.className = 'slot-text';
                     text.textContent = value;
@@ -793,99 +367,67 @@
                 }
             }
 
+            updateRollButton() {
+                this.elements.rollButton.textContent = `ROLL (${this.state.rollEnable})`;
+                this.elements.rollButton.disabled = this.state.rollEnable <= 0;
+            }
+
             async updateRollCount() {
                 if (this.state.rollEnable > 0) {
                     this.state.rollEnable--;
-                    this.elements.rollButton.textContent = `ROLL (${this.state.rollEnable})`;
+                    this.updateRollButton();
                     
-                    if (this.state.rollEnable === 0) {
-                        this.elements.rollButton.disabled = true;
-                    }
-                    
-                    // Save updated roll count to Google Sheets
-                    const script = document.createElement('script');
-                    const params = new URLSearchParams({
-                        action: 'updateRollEnable',
+                    // [보안 수정] 업데이트도 POST 방식으로 안전하게 전송
+                    await this.apiCall('updateRollEnable', {
                         userId: this.state.userId,
                         rollEnable: this.state.rollEnable
                     });
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?${params}`;
-                    document.body.appendChild(script);
-                    
-                    setTimeout(() => {
-                        if (script.parentNode) document.body.removeChild(script);
-                    }, 1000);
                 }
             }
 
             // Dice Management
-            createDot() {
-                const dot = document.createElement('div');
-                dot.className = 'dice-dot';
-                return dot;
-            }
-
-            createDiceFace(value) {
-                const contentDiv = document.createElement('div');
-                contentDiv.className = `dice-content dots-${value}`;
-                
-                for (let i = 0; i < value; i++) {
-                    contentDiv.appendChild(this.createDot());
-                }
-                
-                return contentDiv;
-            }
-
             createDice() {
-                // Clear existing dice
-                if (this.state.diceElement) {
-                    this.state.diceElement.element.remove();
-                }
+                if (this.state.diceElement) this.state.diceElement.element.remove();
                 
                 const diceDiv = document.createElement('div');
                 diceDiv.className = 'dice';
-                
                 const faceDiv = document.createElement('div');
                 faceDiv.className = 'dice-face';
-                
                 const contentDiv = this.createDiceFace(1);
                 
                 faceDiv.appendChild(contentDiv);
                 diceDiv.appendChild(faceDiv);
                 
-                this.state.diceElement = {
-                    element: diceDiv,
-                    face: faceDiv,
-                    content: contentDiv,
-                    value: 1
-                };
-                
+                this.state.diceElement = { element: diceDiv, face: faceDiv, content: contentDiv, value: 1 };
                 this.elements.container.appendChild(diceDiv);
+            }
+
+            createDiceFace(value) {
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `dice-content dots-${value}`;
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < value; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dice-dot';
+                    fragment.appendChild(dot);
+                }
+                contentDiv.appendChild(fragment);
+                return contentDiv;
             }
 
             updateDiceFace(value) {
                 const dice = this.state.diceElement;
                 dice.value = value;
-                dice.content.remove();
-                dice.content = this.createDiceFace(value);
-                dice.face.appendChild(dice.content);
+                dice.face.replaceChild(this.createDiceFace(value), dice.content);
+                dice.content = dice.face.firstElementChild;
             }
 
-            // Animation
             animateRoll() {
                 return new Promise(resolve => {
-                    let elapsed = 0;
-                    
                     const interval = setInterval(() => {
-                        const randomValue = Math.floor(Math.random() * CONFIG.DICE_FACES) + 1;
-                        this.updateDiceFace(randomValue);
-                        
-                        elapsed += CONFIG.ROLL_INTERVAL;
-                        if (elapsed >= CONFIG.ROLL_DURATION) {
-                            clearInterval(interval);
-                            resolve();
-                        }
-                    }, CONFIG.ROLL_INTERVAL);
+                        this.updateDiceFace(Math.floor(Math.random() * this.config.DICE_FACES) + 1);
+                    }, this.config.ROLL_INTERVAL);
+                    setTimeout(() => { clearInterval(interval); resolve(); }, this.config.ROLL_DURATION);
                 });
             }
 
@@ -897,22 +439,16 @@
                 this.elements.rollButton.disabled = true;
                 this.elements.resultDisplay.classList.remove('show');
                 
-                // Start rolling animation
                 this.state.diceElement.element.classList.add('rolling');
-                
-                // Animate roll
                 await this.animateRoll();
                 
-                // Generate final result
+                const finalValue = Math.floor(Math.random() * this.config.DICE_FACES) + 1;
                 this.state.diceElement.element.classList.remove('rolling');
-                const finalValue = Math.floor(Math.random() * CONFIG.DICE_FACES) + 1;
                 this.updateDiceFace(finalValue);
                 
-                // Show result
                 this.elements.resultDisplay.textContent = finalValue;
                 this.elements.resultDisplay.classList.add('show');
                 
-                // Update roll count
                 await this.updateRollCount();
                 
                 this.state.isRolling = false;
@@ -920,22 +456,17 @@
                     this.elements.rollButton.disabled = false;
                 }
             }
-        }
 
-        // Navigation functions
-        function goBack() {
-            const userId = new URLSearchParams(window.location.search).get('id');
-            if (userId) {
-                window.location.href = `index.html?id=${userId}`;
-            } else {
-                window.location.href = 'index.html';
+            goBack() {
+                if (this.state.userId) {
+                    window.location.href = `index.html?id=${this.state.userId}`;
+                } else {
+                    window.location.href = 'index.html';
+                }
             }
         }
-
-        // Initialize when DOM is ready
-        window.addEventListener('DOMContentLoaded', () => {
-            new DiceSimulatorPage2();
-        });
+        
+        window.addEventListener('DOMContentLoaded', () => new DiceSimulatorPage2());
     </script>
 </body>
 </html>
