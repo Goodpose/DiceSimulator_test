@@ -242,8 +242,10 @@
                 this.init();
             }
 
+            // [수정] page2.html 의 cacheElements 함수
             cacheElements() {
                 const elements = {
+                    // container 속성을 명시적으로 추가하여 undefined 오류를 해결합니다.
                     container: document.getElementById('canvas-container'),
                     resultDisplay: document.getElementById('result-display'),
                     rollButton: document.getElementById('rollButton'),
@@ -258,7 +260,6 @@
                 }
                 return elements;
             }
-
             init() {
                 this.bindEvents();
                 this.initializeApp();
