@@ -372,13 +372,21 @@
                 this.init();
             }
 
+            // [수정] dice-simulator.html 의 cacheElements 함수
             cacheElements() {
-                const elementIds = ['canvas-container', 'result-display', 'rollButton', 'diceColor', 'dotColor', 'scoreValue', 'userName', 'coinCount', 'loading-screen', 'nextButton'];
-                const elements = {};
-                for (const id of elementIds) {
-                    elements[id] = document.getElementById(id);
-                }
-                return elements;
+                // 각 DOM 요소를 명시적으로 올바른 속성 이름에 할당하여 undefined 오류를 해결합니다.
+                return {
+                    container: document.getElementById('canvas-container'),
+                    resultDisplay: document.getElementById('result-display'),
+                    rollButton: document.getElementById('rollButton'),
+                    diceColor: document.getElementById('diceColor'),
+                    dotColor: document.getElementById('dotColor'),
+                    scoreValue: document.getElementById('scoreValue'),
+                    userName: document.getElementById('userName'),
+                    coinCount: document.getElementById('coinCount'),
+                    loadingScreen: document.getElementById('loading-screen'),
+                    nextButton: document.getElementById('nextButton')
+                };
             }
 
             init() {
