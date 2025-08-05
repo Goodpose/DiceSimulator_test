@@ -1,0 +1,166 @@
+// [개선] 유지보수를 위해 스프레드시트 ID와 시트 이름을 상수로 관리합니다.
+const SPREADSHEET_ID = '1Ke5jewImhcCk_oHh0kLH3qr99WEGamnDqPmflnCdgQU';
+const SHEET_NAMES = {
+  USER_DATA: 'UserData',
+  DICE_SETTING: 'DiceSetting'
+};
+
+// [개선] GET 요청을 처리하는 중앙 라우터 역할을 합니다.
+function doGet(e) {
+  try {
+    const action = e.parameter.action;
+    const callback = e.parameter.callback;
+    let result;
+
+    switch (action) {
+      case 'loadUser':
+        result = loadUserData(e.parameter.userId);
+        break;
+      case 'updateUser': // GET 요청으로 update를 하는 것은 권장되지 않지만, 기존 로직을 유지합니다.
+        result = updateUserData(e.parameter);
+        break;
+      case 'loadDiceSettings':
+        result = loadDiceSettings(e.parameter.userId);
+        break;
+      case 'updateRollEnable': // GET 요청으로 update를 하는 것은 권장되지 않지만, 기존 로직을 유지합니다.
+        result = updateRollEnable(e.parameter);
+        break;
+      default:
+        // 유효하지 않은 action일 경우, 에러 객체를 생성합니다.
+        result = { status: 'error', message: 'Invalid action' };
+        break;
+    }
+    
+    // [개선] JSON / JSONP 응답 처리를 함수로 분리하여 중복을 제거합니다.
+    return createJsonResponse(result, callback);
+
+  } catch (error) {
+    const errorResponse = { status: 'error', message: error.toString(), stack: error.stack };
+    return createJsonResponse(errorResponse, e.parameter.callback);
+  }
+}
+
+// [개선] POST 요청을 처리하는 중앙 라우터 역할을 합니다.
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    let result;
+
+    switch (data.action) {
+      case 'loadUser':
+        result = loadUserData(data.userId);
+        break;
+      case 'updateUser':
+        result = updateUserData(data);
+        break;
+      case 'createUser':
+        // createUser 함수는 없으므로, 필요 시 추가해야 합니다.
+        // result = createUserData(data); 
+        throw new Error('createUser action is not yet implemented.');
+      default:
+        result = { status: 'error', message: 'Invalid action' };
+        break;
+    }
+    return createJsonResponse(result, null); // POST는 일반적으로 JSONP를 사용하지 않습니다.
+
+  } catch (error) {
+    const errorResponse = { status: 'error', message: error.toString(), stack: error.stack };
+    return createJsonResponse(errorResponse, null);
+  }
+}
+
+/**
+ * [신규] JSON 또는 JSONP 형식으로 응답을 생성하는 헬퍼 함수
+ * @param {Object} data - 응답으로 보낼 JavaScript 객체
+ * @param {string|null} callback - JSONP 콜백 함수 이름
+ * @returns {ContentService.TextOutput} - 최종 응답 객체
+ */
+function createJsonResponse(data, callback) {
+  const jsonString = JSON.stringify(data);
+  if (callback) {
+    return ContentService.createTextOutput(`${callback}(${jsonString})`)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(jsonString)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// [개선] 데이터 로직만 처리하고 순수 객체를 반환하도록 수정
+function loadUserData(userId) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USER_DATA);
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const userIndex = data.findIndex(row => String(row[0]) === String(userId));
+
+  if (userIndex > 0) {
+    const userData = {};
+    headers.forEach((header, index) => {
+      userData[header] = data[userIndex][index];
+    });
+    return { status: 'success', data: userData };
+  } else {
+    return { status: 'not_found' };
+  }
+}
+
+// [개선] 여러 셀을 업데이트할 때 성능을 최적화
+function updateUserData(data) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USER_DATA);
+  const sheetData = sheet.getDataRange().getValues();
+  const userIndex = sheetData.findIndex(row => String(row[0]) === String(data.userId));
+
+  if (userIndex > 0) {
+    const rowIndex = userIndex + 1;
+    // [성능 최적화] 한 번에 여러 셀을 수정할 경우, 한 행을 통째로 읽고 수정한 뒤 한번에 쓰는 것이 빠릅니다.
+    const rowData = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
+    
+    // 메모리 상에서 데이터 업데이트
+    if (data.rollCount !== undefined) rowData[3] = parseInt(data.rollCount);     // D열
+    if (data.rollTri !== undefined) rowData[4] = parseInt(data.rollTri);       // E열
+    if (data.rollStr !== undefined) rowData[5] = parseInt(data.rollStr);       // F열
+    if (data.rollDou !== undefined) rowData[6] = parseInt(data.rollDou);       // G열
+    if (data.rollSum !== undefined) rowData[7] = parseInt(data.rollSum);       // H열
+    if (data.initialDate && !rowData[8]) rowData[8] = data.initialDate;         // I열
+    if (data.lastDate !== undefined) rowData[9] = data.lastDate;              // J열
+    if (data.coinCount !== undefined) rowData[10] = parseInt(data.coinCount);   // K열
+
+    // 수정된 행 데이터를 시트에 한번에 쓰기
+    sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
+    
+    return { status: 'success' };
+  } else {
+    return { status: 'error', message: 'User not found' };
+  }
+}
+
+// [개선] 데이터 로직만 처리하고 순수 객체를 반환하도록 수정
+function loadDiceSettings(userId) {
+  const diceSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.DICE_SETTING);
+  const data = diceSheet.getDataRange().getValues();
+  const headers = data[0];
+  const userIndex = data.findIndex(row => String(row[0]) === String(userId));
+
+  if (userIndex > 0) {
+    const userData = {};
+    headers.forEach((header, index) => {
+      userData[header] = data[userIndex][index];
+    });
+    return { status: 'success', data: userData };
+  } else {
+    return { status: 'not_found' };
+  }
+}
+
+// [개선] 데이터 로직만 처리하고 순수 객체를 반환하도록 수정
+function updateRollEnable(data) {
+  const diceSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.DICE_SETTING);
+  const sheetData = diceSheet.getDataRange().getValues();
+  const userIndex = sheetData.findIndex(row => String(row[0]) === String(data.userId));
+
+  if (userIndex > 0) {
+    diceSheet.getRange(userIndex + 1, 3).setValue(parseInt(data.rollEnable)); // C열
+    return { status: 'success' };
+  } else {
+    return { status: 'error', message: 'User not found' };
+  }
+}
