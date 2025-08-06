@@ -773,11 +773,30 @@
                     this.state.isFirstRoll = false;
                 }
 
-                const script = document.createElement('script');
-                script.onerror = () => {
-                    console.error('Failed to save user data');
+                // JSONP 콜백 함수 생성
+                const callbackName = `saveUserDataCallback_${Date.now()}`;
+                window[callbackName] = (response) => {
+                    console.log('Server response:', response);
+                    if (response.status === 'error') {
+                        console.error('Server error:', response.message, response.stack);
+                        alert(`데이터 저장 실패: ${response.message}`);
+                    } else if (response.status === 'success') {
+                        console.log('User data saved successfully');
+                    }
+                    // 콜백 함수와 스크립트 태그 정리
+                    delete window[callbackName];
+                    document.body.removeChild(script);
                 };
                 
+                const script = document.createElement('script');
+                script.onerror = (error) => {
+                    console.error('Failed to load script:', error);
+                    console.error('Script URL:', script.src);
+                    alert('서버 연결 실패: 네트워크 오류가 발생했습니다.');
+                    delete window[callbackName];
+                };
+                
+                params.append('callback', callbackName);
                 script.src = `${CONFIG.APPS_SCRIPT_URL}?${params}`;
                 document.body.appendChild(script);
                 

@@ -135,11 +135,17 @@ function loadUserData(userId) {
 
 // [수정] 데이터 매핑을 HTML에서 사용하는 필드명에 맞게 수정
 function updateUserData(data) {
-  // 디버깅을 위해 받은 데이터를 로그로 출력
-  console.log('updateUserData received data:', JSON.stringify(data));
+  try {
+    // 디버깅을 위해 받은 데이터를 로그로 출력
+    console.log('updateUserData received data:', JSON.stringify(data));
+    
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USER_DATA);
+    const sheetData = sheet.getDataRange().getValues();
+    
+    // 헤더 정보 출력
+    console.log('Sheet headers:', JSON.stringify(sheetData[0]));
+    console.log('Total columns in sheet:', sheet.getLastColumn());
   
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USER_DATA);
-  const sheetData = sheet.getDataRange().getValues();
   const userIndex = sheetData.findIndex((row, index) => {
     if (index === 0) return false; // 헤더 행 제외
     return String(row[0]) === String(data.userId);
@@ -149,57 +155,81 @@ function updateUserData(data) {
     const rowIndex = userIndex + 1;
     // [성능 최적화] 한 번에 여러 셀을 수정할 경우, 한 행을 통째로 읽고 수정한 뒤 한번에 쓰는 것이 빠릅니다.
     const rowData = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const headers = sheetData[0];
+    
+    // 동적 헤더 인덱스 찾기
+    const rollSumIndex = headers.findIndex(header => header === 'Roll_Sum');
+    const rollCountIndex = headers.findIndex(header => header === 'Roll_Count');
+    const rollTriIndex = headers.findIndex(header => header === 'Roll_Tri');
+    const rollStrIndex = headers.findIndex(header => header === 'Roll_Str');
+    const rollDouIndex = headers.findIndex(header => header === 'Roll_Dou');
+    const coinCountIndex = headers.findIndex(header => header === 'Coin_Count');
+    const initialDateIndex = headers.findIndex(header => header === 'Initial_Date');
+    const lastDateIndex = headers.findIndex(header => header === 'Last_Date');
+    
+    console.log('Column indices - Roll_Sum:', rollSumIndex, 'Roll_Count:', rollCountIndex);
     
     // 업데이트 전 데이터 출력
     console.log('Before update - rowData:', JSON.stringify(rowData));
     
-    // 실제 스프레드시트 열 구조에 맞춤: ID_No(A:0), User_Name(B:1), URL(C:2), Roll_Count(D:3), Roll_Tri(E:4), Roll_Str(F:5), Roll_Dou(G:6), Roll_Sum(H:7), Initial_Date(I:8), Last_Date(J:9), Coin_Count(K:10), IsBattle(L:11)
-    if (data.cumulativeScore !== undefined) {
-      console.log('Updating cumulativeScore from', rowData[7], 'to', parseInt(data.cumulativeScore));
-      rowData[7] = parseInt(data.cumulativeScore);  // H열(7) (Roll_Sum)
+    // 동적 인덱스를 사용한 업데이트
+    if (data.cumulativeScore !== undefined && rollSumIndex >= 0) {
+      console.log('Updating cumulativeScore from', rowData[rollSumIndex], 'to', parseInt(data.cumulativeScore));
+      rowData[rollSumIndex] = parseInt(data.cumulativeScore);
     }
-    if (data.rollCount !== undefined) {
-      console.log('Updating rollCount from', rowData[3], 'to', parseInt(data.rollCount));
-      rowData[3] = parseInt(data.rollCount);            // D열(3) (Roll_Count)
+    if (data.rollCount !== undefined && rollCountIndex >= 0) {
+      console.log('Updating rollCount from', rowData[rollCountIndex], 'to', parseInt(data.rollCount));
+      rowData[rollCountIndex] = parseInt(data.rollCount);
     }
-    if (data.rollTri !== undefined) {
-      console.log('Updating rollTri from', rowData[4], 'to', parseInt(data.rollTri));
-      rowData[4] = parseInt(data.rollTri);                // E열(4) (Roll_Tri)
+    if (data.rollTri !== undefined && rollTriIndex >= 0) {
+      console.log('Updating rollTri from', rowData[rollTriIndex], 'to', parseInt(data.rollTri));
+      rowData[rollTriIndex] = parseInt(data.rollTri);
     }
-    if (data.rollStr !== undefined) {
-      console.log('Updating rollStr from', rowData[5], 'to', parseInt(data.rollStr));
-      rowData[5] = parseInt(data.rollStr);                // F열(5) (Roll_Str)
+    if (data.rollStr !== undefined && rollStrIndex >= 0) {
+      console.log('Updating rollStr from', rowData[rollStrIndex], 'to', parseInt(data.rollStr));
+      rowData[rollStrIndex] = parseInt(data.rollStr);
     }
-    if (data.rollDou !== undefined) {
-      console.log('Updating rollDou from', rowData[6], 'to', parseInt(data.rollDou));
-      rowData[6] = parseInt(data.rollDou);                // G열(6) (Roll_Dou)
+    if (data.rollDou !== undefined && rollDouIndex >= 0) {
+      console.log('Updating rollDou from', rowData[rollDouIndex], 'to', parseInt(data.rollDou));
+      rowData[rollDouIndex] = parseInt(data.rollDou);
     }
-    if (data.coinCount !== undefined) {
-      console.log('Updating coinCount from', rowData[10], 'to', parseInt(data.coinCount));
-      rowData[10] = parseInt(data.coinCount);           // K열(10) (Coin_Count)
+    if (data.coinCount !== undefined && coinCountIndex >= 0) {
+      console.log('Updating coinCount from', rowData[coinCountIndex], 'to', parseInt(data.coinCount));
+      rowData[coinCountIndex] = parseInt(data.coinCount);
     }
-    if (data.initialDate && !rowData[8]) rowData[8] = data.initialDate;                // I열(8) (Initial_Date)
-    if (data.lastDate !== undefined) rowData[9] = data.lastDate;                       // J열(9) (Last_Date)
+    if (data.initialDate && initialDateIndex >= 0 && !rowData[initialDateIndex]) rowData[initialDateIndex] = data.initialDate;
+    if (data.lastDate !== undefined && lastDateIndex >= 0) rowData[lastDateIndex] = data.lastDate;
     
     // 현재 시간으로 Last_Date 자동 업데이트
-    if (!data.lastDate) {
-      rowData[9] = formatDateForScript(new Date());
+    if (!data.lastDate && lastDateIndex >= 0) {
+      rowData[lastDateIndex] = formatDateForScript(new Date());
     }
     
     // 기존 필드명 지원 (하위 호환성)
-    if (data.Roll_Count !== undefined) rowData[3] = parseInt(data.Roll_Count);
-    if (data.Roll_Tri !== undefined) rowData[4] = parseInt(data.Roll_Tri);
-    if (data.Roll_Str !== undefined) rowData[5] = parseInt(data.Roll_Str);
-    if (data.Roll_Dou !== undefined) rowData[6] = parseInt(data.Roll_Dou);
-    if (data.Roll_Sum !== undefined) rowData[7] = parseInt(data.Roll_Sum);
-    if (data.Coin_Count !== undefined) rowData[10] = parseInt(data.Coin_Count);
+    if (data.Roll_Count !== undefined && rollCountIndex >= 0) rowData[rollCountIndex] = parseInt(data.Roll_Count);
+    if (data.Roll_Tri !== undefined && rollTriIndex >= 0) rowData[rollTriIndex] = parseInt(data.Roll_Tri);
+    if (data.Roll_Str !== undefined && rollStrIndex >= 0) rowData[rollStrIndex] = parseInt(data.Roll_Str);
+    if (data.Roll_Dou !== undefined && rollDouIndex >= 0) rowData[rollDouIndex] = parseInt(data.Roll_Dou);
+    if (data.Roll_Sum !== undefined && rollSumIndex >= 0) {
+      console.log('Updating Roll_Sum from', rowData[rollSumIndex], 'to', parseInt(data.Roll_Sum));
+      rowData[rollSumIndex] = parseInt(data.Roll_Sum);
+    }
+    if (data.Coin_Count !== undefined && coinCountIndex >= 0) rowData[coinCountIndex] = parseInt(data.Coin_Count);
+    
+    // 업데이트 후 데이터 출력
+    console.log('After update - rowData:', JSON.stringify(rowData));
 
     // 수정된 행 데이터를 시트에 한번에 쓰기
     sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
     
     return { status: 'success' };
   } else {
-    return { status: 'error', message: 'User not found' };
+    console.log('User not found with ID:', data.userId);
+    return { status: 'error', message: `User not found with ID: ${data.userId}` };
+  }
+  } catch (error) {
+    console.error('Error in updateUserData:', error);
+    return { status: 'error', message: error.toString(), stack: error.stack };
   }
 }
 
