@@ -785,7 +785,9 @@
                     }
                     // 콜백 함수와 스크립트 태그 정리
                     delete window[callbackName];
-                    document.body.removeChild(script);
+                    if (script && script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
                 };
                 
                 const script = document.createElement('script');
@@ -800,9 +802,15 @@
                 script.src = `${CONFIG.APPS_SCRIPT_URL}?${params}`;
                 document.body.appendChild(script);
                 
+                // 타임아웃으로 스크립트 정리 (콜백이 호출되지 않는 경우 대비)
                 setTimeout(() => {
-                    if (script.parentNode) document.body.removeChild(script);
-                }, 1000);
+                    if (script && script.parentNode) {
+                        script.parentNode.removeChild(script);
+                    }
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                    }
+                }, 30000); // 30초 타임아웃
             }
 
             // Dice Management
