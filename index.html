@@ -758,6 +758,13 @@
                     rollStr: this.state.stats.rollStr,
                     rollDou: this.state.stats.rollDou,
                     coinCount: this.state.stats.coinCount,
+                    // 하위 호환성을 위한 필드명 추가
+                    Roll_Sum: this.state.stats.cumulativeScore,
+                    Roll_Count: this.state.stats.rollCount,
+                    Roll_Tri: this.state.stats.rollTri,
+                    Roll_Str: this.state.stats.rollStr,
+                    Roll_Dou: this.state.stats.rollDou,
+                    Coin_Count: this.state.stats.coinCount,
                     lastDate: currentDate,
                     ...(this.state.isFirstRoll && { initialDate: currentDate })
                 });
