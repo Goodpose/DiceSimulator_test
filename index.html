@@ -773,6 +773,9 @@
                     this.state.isFirstRoll = false;
                 }
 
+                // 스크립트 요소를 먼저 생성
+                const script = document.createElement('script');
+                
                 // JSONP 콜백 함수 생성
                 const callbackName = `saveUserDataCallback_${Date.now()}`;
                 window[callbackName] = (response) => {
@@ -785,12 +788,14 @@
                     }
                     // 콜백 함수와 스크립트 태그 정리
                     delete window[callbackName];
-                    if (script && script.parentNode) {
-                        script.parentNode.removeChild(script);
+                    try {
+                        if (script && script.parentNode) {
+                            script.parentNode.removeChild(script);
+                        }
+                    } catch (e) {
+                        console.warn('Script already removed:', e);
                     }
                 };
-                
-                const script = document.createElement('script');
                 script.onerror = (error) => {
                     console.error('Failed to load script:', error);
                     console.error('Script URL:', script.src);
@@ -804,11 +809,15 @@
                 
                 // 타임아웃으로 스크립트 정리 (콜백이 호출되지 않는 경우 대비)
                 setTimeout(() => {
-                    if (script && script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                    if (window[callbackName]) {
-                        delete window[callbackName];
+                    try {
+                        if (script && script.parentNode) {
+                            script.parentNode.removeChild(script);
+                        }
+                        if (window[callbackName]) {
+                            delete window[callbackName];
+                        }
+                    } catch (e) {
+                        console.warn('Timeout cleanup error:', e);
                     }
                 }, 30000); // 30초 타임아웃
             }
