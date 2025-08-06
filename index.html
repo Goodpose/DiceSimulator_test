@@ -419,8 +419,9 @@
                 return response;
             }
 
-            // [보안 수정] JSONP 대신 fetch와 POST를 사용하여 보안 강화
-            async apiCall(action, payload = {}) {
+            // [수정] 에러 처리 개선 및 재시도 로직 추가
+            async apiCall(action, payload = {}, retryCount = 0) {
+                const maxRetries = 2;
                 try {
                     const response = await this.fetchWithTimeout(this.config.APPS_SCRIPT_URL, {
                         method: 'POST',
@@ -432,15 +433,30 @@
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    return await response.json();
+                    const result = await response.json();
+                    
+                    // Apps Script에서 에러를 반환한 경우 처리
+                    if (result.status === 'error') {
+                        throw new Error(result.message || 'Unknown server error');
+                    }
+                    
+                    return result;
 
                 } catch (error) {
-                    console.error(`API call failed for action "${action}":`, error);
-                    // AbortError는 타임아웃을 의미
+                    console.error(`API call failed for action "${action}" (attempt ${retryCount + 1}):`, error);
+                    
+                    // 재시도 로직
+                    if (retryCount < maxRetries && (error.name === 'AbortError' || error.message.includes('network'))) {
+                        console.log(`Retrying API call for action "${action}"...`);
+                        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // 지수 백오프
+                        return this.apiCall(action, payload, retryCount + 1);
+                    }
+                    
+                    // 최종 실패 시 사용자에게 알림
                     if (error.name === 'AbortError') {
-                        alert('서버 응답 시간이 초과되었습니다.');
+                        alert('서버 응답 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.');
                     } else {
-                        alert('서버와 통신 중 오류가 발생했습니다.');
+                        alert(`서버와 통신 중 오류가 발생했습니다: ${error.message}`);
                     }
                     return null; // 오류 발생 시 null 반환
                 }
@@ -492,7 +508,12 @@
                 const currentDate = new Date().toISOString(); // [개선] ISO 표준 형식 사용
                 const payload = {
                     userId: this.state.userId,
-                    ...this.state.stats,
+                    Roll_Count: this.state.stats.Roll_Count,
+                    Roll_Tri: this.state.stats.Roll_Tri,
+                    Roll_Str: this.state.stats.Roll_Str,
+                    Roll_Dou: this.state.stats.Roll_Dou,
+                    Roll_Sum: this.state.stats.Roll_Sum,
+                    Coin_Count: this.state.stats.Coin_Count,
                     lastDate: currentDate
                 };
 
@@ -654,9 +675,17 @@
                 
                 const combo = this.checkCombinations(results);
                 if (combo) {
-                    const comboKey = `Roll_${combo.type.charAt(0) + combo.type.slice(1).toLowerCase()}`;
-                    if (this.state.stats.hasOwnProperty(comboKey)) {
-                         this.state.stats[comboKey]++;
+                    // [수정] 콤보 타입을 올바른 필드명으로 매핑
+                    switch(combo.type) {
+                        case 'TRIPLE':
+                            this.state.stats.Roll_Tri++;
+                            break;
+                        case 'STRAIGHT':
+                            this.state.stats.Roll_Str++;
+                            break;
+                        case 'DOUBLE':
+                            this.state.stats.Roll_Dou++;
+                            break;
                     }
                 }
                 
