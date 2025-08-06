@@ -348,25 +348,35 @@
             justify-content: center;
         }
 
-        .control-group h3, .score-display h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
+        .combo-stats {
+            display: flex;
+            gap: 20px;
+            width: 100%;
         }
 
-        .control-group h3 {
-            color: #fff;
+        .combo-item {
+            flex: 1;
+            text-align: center;
         }
 
-        .score-display h3 {
+        .combo-item h4 {
+            font-size: 14px;
             color: #888;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .score-value {
-            font: bold 48px 'Russo One', sans-serif;
+        .combo-value {
+            font: bold 32px 'Russo One', sans-serif;
             color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .control-group h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #fff;
         }
 
         .control-row {
@@ -461,7 +471,8 @@
 
             .combo-text { font-size: 20px; }
             .combo-detail { font-size: 12px; }
-            .score-value { font-size: 36px; }
+            .combo-value { font-size: 24px; }
+            .combo-stats { gap: 15px; }
             #user-info { font-size: 12px; padding: 8px 15px; }
             
             #coin-display {
@@ -513,8 +524,20 @@
             </div>
             
             <div class="score-display">
-                <h3>총점</h3>
-                <div class="score-value" id="scoreValue">0</div>
+                <div class="combo-stats">
+                    <div class="combo-item">
+                        <h4>Triple</h4>
+                        <div class="combo-value" id="tripleValue">0</div>
+                    </div>
+                    <div class="combo-item">
+                        <h4>Straight</h4>
+                        <div class="combo-value" id="straightValue">0</div>
+                    </div>
+                    <div class="combo-item">
+                        <h4>Double</h4>
+                        <div class="combo-value" id="doubleValue">0</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -573,7 +596,9 @@
                     rollButton: document.getElementById('rollButton'),
                     diceColorInput: document.getElementById('diceColor'),
                     dotColorInput: document.getElementById('dotColor'),
-                    scoreValue: document.getElementById('scoreValue'),
+                    tripleValue: document.getElementById('tripleValue'),
+                    straightValue: document.getElementById('straightValue'),
+                    doubleValue: document.getElementById('doubleValue'),
                     userName: document.getElementById('userName'),
                     coinCount: document.getElementById('coinCount'),
                     loadingScreen: document.getElementById('loading-screen'),
@@ -717,7 +742,9 @@
                 this.state.isFirstRoll = !this.state.initialDate;
                 
                 this.elements.userName.textContent = this.state.userName;
-                this.elements.scoreValue.textContent = this.state.stats.cumulativeScore;
+                this.elements.tripleValue.textContent = this.state.stats.rollTri;
+                this.elements.straightValue.textContent = this.state.stats.rollStr;
+                this.elements.doubleValue.textContent = this.state.stats.rollDou;
                 this.elements.coinCount.textContent = this.state.stats.coinCount;
                 
                 // Battle 버튼 표시/숨김
@@ -1010,7 +1037,10 @@
                 }
                 
                 this.displayResult(total, combo);
-                this.elements.scoreValue.textContent = this.state.stats.cumulativeScore;
+                // 콤보 카운트 표시 업데이트
+                this.elements.tripleValue.textContent = this.state.stats.rollTri;
+                this.elements.straightValue.textContent = this.state.stats.rollStr;
+                this.elements.doubleValue.textContent = this.state.stats.rollDou;
                 
                 await this.saveUserData();
             }
