@@ -1,7 +1,7 @@
 // [개선] 유지보수를 위해 스프레드시트 ID와 시트 이름을 상수로 관리합니다.
 const SPREADSHEET_ID = '1Ke5jewImhcCk_oHh0kLH3qr99WEGamnDqPmflnCdgQU';
 const SHEET_NAMES = {
-  USER_DATA: '주사위 시뮬레이터 데이터',
+  USER_DATA: 'UserData',
   DICE_SETTING: 'DiceSetting'
 };
 
@@ -147,15 +147,15 @@ function updateUserData(data) {
     // [성능 최적화] 한 번에 여러 셀을 수정할 경우, 한 행을 통째로 읽고 수정한 뒤 한번에 쓰는 것이 빠릅니다.
     const rowData = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
     
-    // 실제 스프레드시트 열 구조에 맞춤: ID_No(A), User_Name(B), URL(C), Roll_Count(D), Roll_Tri(E), Roll_Str(F), Roll_Dou(G), Roll_Sum(H), Initial_Date(I), Last_Date(J), Coin_Count(K), IsBattle(L)
-    if (data.cumulativeScore !== undefined) rowData[7] = parseInt(data.cumulativeScore);  // H열 (Roll_Sum)
-    if (data.rollCount !== undefined) rowData[3] = parseInt(data.rollCount);            // D열 (Roll_Count)
-    if (data.rollTri !== undefined) rowData[4] = parseInt(data.rollTri);                // E열 (Roll_Tri)
-    if (data.rollStr !== undefined) rowData[5] = parseInt(data.rollStr);                // F열 (Roll_Str)
-    if (data.rollDou !== undefined) rowData[6] = parseInt(data.rollDou);                // G열 (Roll_Dou)
-    if (data.coinCount !== undefined) rowData[10] = parseInt(data.coinCount);           // K열 (Coin_Count)
-    if (data.initialDate && !rowData[8]) rowData[8] = data.initialDate;                // I열 (Initial_Date)
-    if (data.lastDate !== undefined) rowData[9] = data.lastDate;                       // J열 (Last_Date)
+    // 실제 스프레드시트 열 구조에 맞춤: ID_No(A:0), User_Name(B:1), URL(C:2), Roll_Count(D:3), Roll_Tri(E:4), Roll_Str(F:5), Roll_Dou(G:6), Roll_Sum(H:7), Initial_Date(I:8), Last_Date(J:9), Coin_Count(K:10), IsBattle(L:11)
+    if (data.cumulativeScore !== undefined) rowData[7] = parseInt(data.cumulativeScore);  // H열(7) (Roll_Sum)
+    if (data.rollCount !== undefined) rowData[3] = parseInt(data.rollCount);            // D열(3) (Roll_Count)
+    if (data.rollTri !== undefined) rowData[4] = parseInt(data.rollTri);                // E열(4) (Roll_Tri)
+    if (data.rollStr !== undefined) rowData[5] = parseInt(data.rollStr);                // F열(5) (Roll_Str)
+    if (data.rollDou !== undefined) rowData[6] = parseInt(data.rollDou);                // G열(6) (Roll_Dou)
+    if (data.coinCount !== undefined) rowData[10] = parseInt(data.coinCount);           // K열(10) (Coin_Count)
+    if (data.initialDate && !rowData[8]) rowData[8] = data.initialDate;                // I열(8) (Initial_Date)
+    if (data.lastDate !== undefined) rowData[9] = data.lastDate;                       // J열(9) (Last_Date)
     
     // 현재 시간으로 Last_Date 자동 업데이트
     if (!data.lastDate) {
@@ -229,8 +229,9 @@ function updateRollEnable(data) {
 
     if (userIndex > 0) {
       // HTML에서 사용하는 필드명을 우선 적용
+      // DiceSetting 구조: User_ID(A:0), User_Name(B:1), Roll_Enable(C:2), Dice_S1(D:3), Dice_S2(E:4), Dice_S3(F:5), Dice_S4(G:6), Dice_S5(H:7), Dice_S6(I:8)
       const rollEnableValue = data.rollEnable !== undefined ? data.rollEnable : data.Roll_Enable;
-      diceSheet.getRange(userIndex + 1, 2).setValue(parseInt(rollEnableValue)); // B열 (Roll_Enable)
+      diceSheet.getRange(userIndex + 1, 3).setValue(parseInt(rollEnableValue)); // C열(2) (Roll_Enable)
       return { status: 'success' };
     } else {
       return { status: 'error', message: 'User not found' };
@@ -275,13 +276,13 @@ function updateDiceSlot(data) {
       const rowIndex = userIndex + 1;
       const rowData = diceSheet.getRange(rowIndex, 1, 1, diceSheet.getLastColumn()).getValues()[0];
       
-      // S1~S6 슬롯 데이터 업데이트 (C열~H열로 가정)
-      if (data.Dice_S1 !== undefined) rowData[2] = data.Dice_S1; // C열
-      if (data.Dice_S2 !== undefined) rowData[3] = data.Dice_S2; // D열
-      if (data.Dice_S3 !== undefined) rowData[4] = data.Dice_S3; // E열
-      if (data.Dice_S4 !== undefined) rowData[5] = data.Dice_S4; // F열
-      if (data.Dice_S5 !== undefined) rowData[6] = data.Dice_S5; // G열
-      if (data.Dice_S6 !== undefined) rowData[7] = data.Dice_S6; // H열
+      // DiceSetting 구조: User_ID(A:0), User_Name(B:1), Roll_Enable(C:2), Dice_S1(D:3), Dice_S2(E:4), Dice_S3(F:5), Dice_S4(G:6), Dice_S5(H:7), Dice_S6(I:8)
+      if (data.Dice_S1 !== undefined) rowData[3] = parseInt(data.Dice_S1); // D열(3)
+      if (data.Dice_S2 !== undefined) rowData[4] = parseInt(data.Dice_S2); // E열(4)
+      if (data.Dice_S3 !== undefined) rowData[5] = parseInt(data.Dice_S3); // F열(5)
+      if (data.Dice_S4 !== undefined) rowData[6] = parseInt(data.Dice_S4); // G열(6)
+      if (data.Dice_S5 !== undefined) rowData[7] = parseInt(data.Dice_S5); // H열(7)
+      if (data.Dice_S6 !== undefined) rowData[8] = parseInt(data.Dice_S6); // I열(8)
       
       // 수정된 행 데이터를 시트에 한번에 쓰기
       diceSheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
