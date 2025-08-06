@@ -1,17 +1,4 @@
-            #coin-display {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-            
-            .coin-icon {
-                width: 24px;
-                height: 24px;
-                font-size: 14px;
-            }
-            
-            .coin-count {
-                font-size: 16px;
-            }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -476,6 +463,21 @@
             .combo-detail { font-size: 12px; }
             .score-value { font-size: 36px; }
             #user-info { font-size: 12px; padding: 8px 15px; }
+            
+            #coin-display {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+            
+            .coin-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
+            
+            .coin-count {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -524,7 +526,7 @@
 
         // Configuration
         const CONFIG = {
-            APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyGDIIWR4sLb_iyUJG6wT2vFqZMa_rKqRY6GUhEP5o7ZHgzJEgm1_Z4JhOhfJ4U5OI/exec',
             ROLL_DURATION: 1000,
             ROLL_INTERVAL: 100,
             DICE_COUNT: 3,
@@ -640,7 +642,9 @@
                         resolve();
                     };
                     
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                    const requestUrl = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                    console.log('Loading user data from:', requestUrl);
+                    script.src = requestUrl;
                     document.body.appendChild(script);
                     
                     setTimeout(() => {
@@ -685,7 +689,12 @@
                 const params = new URLSearchParams({
                     action: 'updateUser',
                     userId: this.state.userId,
-                    ...this.state.stats,
+                    cumulativeScore: this.state.stats.cumulativeScore,
+                    rollCount: this.state.stats.rollCount,
+                    rollTri: this.state.stats.rollTri,
+                    rollStr: this.state.stats.rollStr,
+                    rollDou: this.state.stats.rollDou,
+                    coinCount: this.state.stats.coinCount,
                     lastDate: currentDate,
                     ...(this.state.isFirstRoll && { initialDate: currentDate })
                 });

@@ -610,7 +610,7 @@
 
         // Configuration
         const CONFIG = {
-            APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyGDIIWR4sLb_iyUJG6wT2vFqZMa_rKqRY6GUhEP5o7ZHgzJEgm1_Z4JhOhfJ4U5OI/exec',
             ROLL_DURATION: 1000,
             ROLL_INTERVAL: 100,
             DICE_COUNT: 1,  // Fixed to 1 dice
@@ -734,6 +734,7 @@
                     const callbackName = `callback_dice_${Date.now()}`;
                     
                     window[callbackName] = (result) => {
+                        console.log('loadDiceSettings result:', result);
                         if (result.status === 'success') {
                             this.state.rollEnable = parseInt(result.data.Roll_Enable) || 0;
                             
@@ -753,6 +754,9 @@
                                 this.state.diceSlots[slotKey] = diceValue;
                                 this.updateSlot(slotKey, diceValue);
                             }
+                        } else {
+                            console.error('Error loading dice settings:', result);
+                            alert(`서버와 통신 중 오류가 발생했습니다: ${result.message || 'Unknown error'}`);
                         }
                         
                         delete window[callbackName];
@@ -760,7 +764,9 @@
                         resolve();
                     };
                     
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadDiceSettings&userId=${this.state.userId}`;
+                    const requestUrl = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadDiceSettings&userId=${this.state.userId}`;
+                    console.log('Loading dice settings from:', requestUrl);
+                    script.src = requestUrl;
                     document.body.appendChild(script);
                 });
             }

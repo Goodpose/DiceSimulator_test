@@ -25,6 +25,9 @@ function doGet(e) {
       case 'updateRollEnable': // GET 요청으로 update를 하는 것은 권장되지 않지만, 기존 로직을 유지합니다.
         result = updateRollEnable(e.parameter);
         break;
+      case 'updateDiceSlot': // 새로운 액션 추가 - 주사위 슬롯 업데이트
+        result = updateDiceSlot(e.parameter);
+        break;
       default:
         // 유효하지 않은 action일 경우, 에러 객체를 생성합니다.
         result = { status: 'error', message: 'Invalid action' };
@@ -58,6 +61,9 @@ function doPost(e) {
         break;
       case 'updateRollEnable':
         result = updateRollEnable(data);
+        break;
+      case 'updateDiceSlot': // 새로운 액션 추가 - 주사위 슬롯 업데이트
+        result = updateDiceSlot(data);
         break;
       case 'createUser':
         // createUser 함수는 없으므로, 필요 시 추가해야 합니다.
@@ -121,22 +127,27 @@ function updateUserData(data) {
     const rowData = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
     
     // 메모리 상에서 데이터 업데이트 - HTML에서 사용하는 필드명에 맞춤
-    if (data.Roll_Count !== undefined) rowData[2] = parseInt(data.Roll_Count);     // C열
-    if (data.Roll_Tri !== undefined) rowData[3] = parseInt(data.Roll_Tri);       // D열
-    if (data.Roll_Str !== undefined) rowData[4] = parseInt(data.Roll_Str);       // E열
-    if (data.Roll_Dou !== undefined) rowData[5] = parseInt(data.Roll_Dou);       // F열
-    if (data.Roll_Sum !== undefined) rowData[6] = parseInt(data.Roll_Sum);       // G열
-    if (data.initialDate && !rowData[7]) rowData[7] = data.initialDate;         // H열
-    if (data.lastDate !== undefined) rowData[8] = data.lastDate;              // I열
-    if (data.Coin_Count !== undefined) rowData[9] = parseInt(data.Coin_Count);   // J열
+    if (data.cumulativeScore !== undefined) rowData[6] = parseInt(data.cumulativeScore);  // G열 (Roll_Sum)
+    if (data.rollCount !== undefined) rowData[2] = parseInt(data.rollCount);            // C열 (Roll_Count)
+    if (data.rollTri !== undefined) rowData[3] = parseInt(data.rollTri);                // D열 (Roll_Tri)
+    if (data.rollStr !== undefined) rowData[4] = parseInt(data.rollStr);                // E열 (Roll_Str)
+    if (data.rollDou !== undefined) rowData[5] = parseInt(data.rollDou);                // F열 (Roll_Dou)
+    if (data.coinCount !== undefined) rowData[9] = parseInt(data.coinCount);            // J열 (Coin_Count)
+    if (data.initialDate && !rowData[7]) rowData[7] = data.initialDate;                // H열 (Initial_Date)
+    if (data.lastDate !== undefined) rowData[8] = data.lastDate;                       // I열 (Last_Date)
     
-    // 하위 호환성을 위한 기존 필드명도 지원
-    if (data.rollCount !== undefined) rowData[2] = parseInt(data.rollCount);
-    if (data.rollTri !== undefined) rowData[3] = parseInt(data.rollTri);
-    if (data.rollStr !== undefined) rowData[4] = parseInt(data.rollStr);
-    if (data.rollDou !== undefined) rowData[5] = parseInt(data.rollDou);
-    if (data.rollSum !== undefined) rowData[6] = parseInt(data.rollSum);
-    if (data.coinCount !== undefined) rowData[9] = parseInt(data.coinCount);
+    // 현재 시간으로 Last_Date 자동 업데이트
+    if (!data.lastDate) {
+      rowData[8] = formatDateForScript(new Date());
+    }
+    
+    // 기존 필드명 지원 (하위 호환성)
+    if (data.Roll_Count !== undefined) rowData[2] = parseInt(data.Roll_Count);
+    if (data.Roll_Tri !== undefined) rowData[3] = parseInt(data.Roll_Tri);
+    if (data.Roll_Str !== undefined) rowData[4] = parseInt(data.Roll_Str);
+    if (data.Roll_Dou !== undefined) rowData[5] = parseInt(data.Roll_Dou);
+    if (data.Roll_Sum !== undefined) rowData[6] = parseInt(data.Roll_Sum);
+    if (data.Coin_Count !== undefined) rowData[9] = parseInt(data.Coin_Count);
 
     // 수정된 행 데이터를 시트에 한번에 쓰기
     sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
@@ -173,10 +184,56 @@ function updateRollEnable(data) {
 
   if (userIndex > 0) {
     // HTML에서 사용하는 필드명을 우선 적용
-    const rollEnableValue = data.Roll_Enable !== undefined ? data.Roll_Enable : data.rollEnable;
+    const rollEnableValue = data.rollEnable !== undefined ? data.rollEnable : data.Roll_Enable;
     diceSheet.getRange(userIndex + 1, 2).setValue(parseInt(rollEnableValue)); // B열 (Roll_Enable)
     return { status: 'success' };
   } else {
     return { status: 'error', message: 'User not found' };
+  }
+}
+
+/**
+ * [신규] Google Apps Script에서 날짜를 포맷하는 헬퍼 함수
+ */
+function formatDateForScript(date) {
+  const year = date.getFullYear().toString().slice(-2);
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = (hours % 12 || 12).toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  
+  return `${year}.${month}.${day} ${ampm} ${hour12}:${minutes}:${seconds}`;
+}
+
+/**
+ * [신규] 주사위 슬롯 설정을 업데이트하는 함수
+ * Page2에서 사용하는 S1-S6 슬롯의 주사위 값을 업데이트
+ */
+function updateDiceSlot(data) {
+  const diceSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.DICE_SETTING);
+  const sheetData = diceSheet.getDataRange().getValues();
+  const userIndex = sheetData.findIndex(row => String(row[0]) === String(data.userId));
+
+  if (userIndex > 0) {
+    const rowIndex = userIndex + 1;
+    const rowData = diceSheet.getRange(rowIndex, 1, 1, diceSheet.getLastColumn()).getValues()[0];
+    
+    // S1~S6 슬롯 데이터 업데이트 (C열~H열로 가정)
+    if (data.Dice_S1 !== undefined) rowData[2] = data.Dice_S1; // C열
+    if (data.Dice_S2 !== undefined) rowData[3] = data.Dice_S2; // D열
+    if (data.Dice_S3 !== undefined) rowData[4] = data.Dice_S3; // E열
+    if (data.Dice_S4 !== undefined) rowData[5] = data.Dice_S4; // F열
+    if (data.Dice_S5 !== undefined) rowData[6] = data.Dice_S5; // G열
+    if (data.Dice_S6 !== undefined) rowData[7] = data.Dice_S6; // H열
+    
+    // 수정된 행 데이터를 시트에 한번에 쓰기
+    diceSheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
+    
+    return { status: 'success' };
+  } else {
+    return { status: 'error', message: 'User not found in DiceSetting sheet' };
   }
 }
