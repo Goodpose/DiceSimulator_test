@@ -280,8 +280,9 @@
                 return response;
             }
 
-            // [보안 수정] API 호출 함수 (첫 페이지와 동일)
-            async apiCall(action, payload = {}) {
+            // [수정] 에러 처리 개선 및 재시도 로직 추가 (첫 페이지와 동일)
+            async apiCall(action, payload = {}, retryCount = 0) {
+                const maxRetries = 2;
                 try {
                     const response = await this.fetchWithTimeout(this.config.APPS_SCRIPT_URL, {
                         method: 'POST',
@@ -290,11 +291,30 @@
                         redirect: 'follow'
                     });
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return await response.json();
+                    const result = await response.json();
+                    
+                    // Apps Script에서 에러를 반환한 경우 처리
+                    if (result.status === 'error') {
+                        throw new Error(result.message || 'Unknown server error');
+                    }
+                    
+                    return result;
                 } catch (error) {
-                    console.error(`API call failed for action "${action}":`, error);
-                    if (error.name === 'AbortError') alert('서버 응답 시간이 초과되었습니다.');
-                    else alert('서버와 통신 중 오류가 발생했습니다.');
+                    console.error(`API call failed for action "${action}" (attempt ${retryCount + 1}):`, error);
+                    
+                    // 재시도 로직
+                    if (retryCount < maxRetries && (error.name === 'AbortError' || error.message.includes('network'))) {
+                        console.log(`Retrying API call for action "${action}"...`);
+                        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+                        return this.apiCall(action, payload, retryCount + 1);
+                    }
+                    
+                    // 최종 실패 시 사용자에게 알림
+                    if (error.name === 'AbortError') {
+                        alert('서버 응답 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.');
+                    } else {
+                        alert(`서버와 통신 중 오류가 발생했습니다: ${error.message}`);
+                    }
                     return null;
                 }
             }
@@ -378,10 +398,10 @@
                     this.state.rollEnable--;
                     this.updateRollButton();
                     
-                    // [보안 수정] 업데이트도 POST 방식으로 안전하게 전송
+                    // [수정] 필드명을 스프레드시트 컬럼명에 맞게 수정
                     await this.apiCall('updateRollEnable', {
                         userId: this.state.userId,
-                        rollEnable: this.state.rollEnable
+                        Roll_Enable: this.state.rollEnable
                     });
                 }
             }
