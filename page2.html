@@ -610,7 +610,7 @@
 
         // Configuration
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyGDIIWR4sLb_iyUJG6wT2vFqZMa_rKqRY6GUhEP5o7ZHgzJEgm1_Z4JhOhfJ4U5OI/exec',
+            APPS_SCRIPT_URL: 'YOUR_APPS_SCRIPT_URL_HERE', // 실제 Google Apps Script 배포 URL로 교체 필요
             ROLL_DURATION: 1000,
             ROLL_INTERVAL: 100,
             DICE_COUNT: 1,  // Fixed to 1 dice
@@ -688,11 +688,27 @@
 
                 this.state.userId = userId;
 
+                // 테스트 모드 체크
+                if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
+                    console.warn('Apps Script URL이 설정되지 않았습니다. 테스트 모드로 실행합니다.');
+                    this.runTestMode(userId);
+                    return;
+                }
+
                 return new Promise((resolve) => {
                     const script = document.createElement('script');
                     const callbackName = `callback_${Date.now()}`;
                     
+                    script.onerror = () => {
+                        console.error('Script loading failed');
+                        alert('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+                        this.elements.loadingScreen.style.display = 'none';
+                        delete window[callbackName];
+                        resolve();
+                    };
+                    
                     window[callbackName] = (result) => {
+                        console.log('Server response:', result);
                         if (result.status === 'success') {
                             this.state.userName = result.data.User_Name;
                             this.state.coinCount = parseInt(result.data.Coin_Count) || 0;
@@ -703,7 +719,7 @@
                             alert('사용자를 찾을 수 없습니다.');
                         } else {
                             console.error('Error loading user data:', result);
-                            alert('데이터를 불러오는 중 오류가 발생했습니다.');
+                            alert(`데이터를 불러오는 중 오류가 발생했습니다: ${result.message || 'Unknown error'}`);
                         }
                         
                         this.elements.loadingScreen.style.display = 'none';
@@ -712,13 +728,16 @@
                         resolve();
                     };
                     
-                    script.src = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                    const requestUrl = `${CONFIG.APPS_SCRIPT_URL}?callback=${callbackName}&action=loadUser&userId=${userId}`;
+                    console.log('Loading user data from:', requestUrl);
+                    script.src = requestUrl;
                     document.body.appendChild(script);
                     
                     setTimeout(() => {
                         if (window[callbackName]) {
-                            console.error('Request timeout');
-                            alert('서버 응답 시간이 초과되었습니다.');
+                            console.error('Request timeout after', CONFIG.TIMEOUT_DURATION, 'ms');
+                            console.error('Failed URL:', requestUrl);
+                            alert('서버 응답 시간이 초과되었습니다. Google Apps Script URL을 확인해주세요.');
                             this.elements.loadingScreen.style.display = 'none';
                             delete window[callbackName];
                             if (script.parentNode) document.body.removeChild(script);
@@ -728,10 +747,45 @@
                 });
             }
 
+            // 테스트 모드
+            runTestMode(userId) {
+                console.log('Running in test mode for userId:', userId);
+                
+                this.state.userName = `테스트사용자_${userId}`;
+                this.state.coinCount = 50;
+                this.elements.userName.textContent = this.state.userName;
+                this.elements.coinCount.textContent = this.state.coinCount;
+                this.elements.loadingScreen.style.display = 'none';
+                
+                alert('테스트 모드로 실행되었습니다. Google Apps Script URL을 올바르게 설정해주세요.');
+            }
+
             async loadDiceSettings() {
+                // 테스트 모드에서는 기본값 설정
+                if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
+                    console.log('Using test data for dice settings');
+                    this.state.rollEnable = 3; // 테스트용 롤 가능 횟수
+                    this.elements.rollButton.textContent = `ROLL (${this.state.rollEnable})`;
+                    this.elements.rollButton.disabled = false;
+                    
+                    // 테스트용 슬롯 데이터
+                    for (let i = 1; i <= 6; i++) {
+                        const slotKey = `s${i}`;
+                        this.state.diceSlots[slotKey] = i; // 각 슬롯에 해당 숫자 할당
+                        this.updateSlot(slotKey, i);
+                    }
+                    return;
+                }
+
                 return new Promise((resolve) => {
                     const script = document.createElement('script');
                     const callbackName = `callback_dice_${Date.now()}`;
+                    
+                    script.onerror = () => {
+                        console.error('Dice settings script loading failed');
+                        alert('주사위 설정을 불러올 수 없습니다.');
+                        resolve();
+                    };
                     
                     window[callbackName] = (result) => {
                         console.log('loadDiceSettings result:', result);
@@ -760,7 +814,7 @@
                         }
                         
                         delete window[callbackName];
-                        document.body.removeChild(script);
+                        if (script.parentNode) document.body.removeChild(script);
                         resolve();
                     };
                     
@@ -768,6 +822,17 @@
                     console.log('Loading dice settings from:', requestUrl);
                     script.src = requestUrl;
                     document.body.appendChild(script);
+                    
+                    // 타임아웃 추가
+                    setTimeout(() => {
+                        if (window[callbackName]) {
+                            console.error('Dice settings request timeout');
+                            alert('주사위 설정 로딩 시간이 초과되었습니다.');
+                            delete window[callbackName];
+                            if (script.parentNode) document.body.removeChild(script);
+                            resolve();
+                        }
+                    }, CONFIG.TIMEOUT_DURATION);
                 });
             }
 
@@ -808,6 +873,12 @@
                         this.elements.rollButton.disabled = true;
                     }
                     
+                    // 테스트 모드에서는 서버에 저장하지 않음
+                    if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
+                        console.log('Test mode: Roll count updated locally only');
+                        return;
+                    }
+                    
                     // Save updated roll count to Google Sheets
                     const script = document.createElement('script');
                     const params = new URLSearchParams({
@@ -815,6 +886,11 @@
                         userId: this.state.userId,
                         rollEnable: this.state.rollEnable
                     });
+                    
+                    script.onerror = () => {
+                        console.error('Failed to update roll count');
+                    };
+                    
                     script.src = `${CONFIG.APPS_SCRIPT_URL}?${params}`;
                     document.body.appendChild(script);
                     
