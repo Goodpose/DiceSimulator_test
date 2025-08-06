@@ -135,6 +135,9 @@ function loadUserData(userId) {
 
 // [수정] 데이터 매핑을 HTML에서 사용하는 필드명에 맞게 수정
 function updateUserData(data) {
+  // 디버깅을 위해 받은 데이터를 로그로 출력
+  console.log('updateUserData received data:', JSON.stringify(data));
+  
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAMES.USER_DATA);
   const sheetData = sheet.getDataRange().getValues();
   const userIndex = sheetData.findIndex((row, index) => {
@@ -147,13 +150,34 @@ function updateUserData(data) {
     // [성능 최적화] 한 번에 여러 셀을 수정할 경우, 한 행을 통째로 읽고 수정한 뒤 한번에 쓰는 것이 빠릅니다.
     const rowData = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
     
+    // 업데이트 전 데이터 출력
+    console.log('Before update - rowData:', JSON.stringify(rowData));
+    
     // 실제 스프레드시트 열 구조에 맞춤: ID_No(A:0), User_Name(B:1), URL(C:2), Roll_Count(D:3), Roll_Tri(E:4), Roll_Str(F:5), Roll_Dou(G:6), Roll_Sum(H:7), Initial_Date(I:8), Last_Date(J:9), Coin_Count(K:10), IsBattle(L:11)
-    if (data.cumulativeScore !== undefined) rowData[7] = parseInt(data.cumulativeScore);  // H열(7) (Roll_Sum)
-    if (data.rollCount !== undefined) rowData[3] = parseInt(data.rollCount);            // D열(3) (Roll_Count)
-    if (data.rollTri !== undefined) rowData[4] = parseInt(data.rollTri);                // E열(4) (Roll_Tri)
-    if (data.rollStr !== undefined) rowData[5] = parseInt(data.rollStr);                // F열(5) (Roll_Str)
-    if (data.rollDou !== undefined) rowData[6] = parseInt(data.rollDou);                // G열(6) (Roll_Dou)
-    if (data.coinCount !== undefined) rowData[10] = parseInt(data.coinCount);           // K열(10) (Coin_Count)
+    if (data.cumulativeScore !== undefined) {
+      console.log('Updating cumulativeScore from', rowData[7], 'to', parseInt(data.cumulativeScore));
+      rowData[7] = parseInt(data.cumulativeScore);  // H열(7) (Roll_Sum)
+    }
+    if (data.rollCount !== undefined) {
+      console.log('Updating rollCount from', rowData[3], 'to', parseInt(data.rollCount));
+      rowData[3] = parseInt(data.rollCount);            // D열(3) (Roll_Count)
+    }
+    if (data.rollTri !== undefined) {
+      console.log('Updating rollTri from', rowData[4], 'to', parseInt(data.rollTri));
+      rowData[4] = parseInt(data.rollTri);                // E열(4) (Roll_Tri)
+    }
+    if (data.rollStr !== undefined) {
+      console.log('Updating rollStr from', rowData[5], 'to', parseInt(data.rollStr));
+      rowData[5] = parseInt(data.rollStr);                // F열(5) (Roll_Str)
+    }
+    if (data.rollDou !== undefined) {
+      console.log('Updating rollDou from', rowData[6], 'to', parseInt(data.rollDou));
+      rowData[6] = parseInt(data.rollDou);                // G열(6) (Roll_Dou)
+    }
+    if (data.coinCount !== undefined) {
+      console.log('Updating coinCount from', rowData[10], 'to', parseInt(data.coinCount));
+      rowData[10] = parseInt(data.coinCount);           // K열(10) (Coin_Count)
+    }
     if (data.initialDate && !rowData[8]) rowData[8] = data.initialDate;                // I열(8) (Initial_Date)
     if (data.lastDate !== undefined) rowData[9] = data.lastDate;                       // J열(9) (Last_Date)
     

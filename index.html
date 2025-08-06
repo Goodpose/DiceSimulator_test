@@ -736,6 +736,19 @@
                 }
 
                 const currentDate = this.formatDate(new Date());
+                // 디버깅을 위해 전송할 데이터 출력
+                console.log('Saving user data:', {
+                    action: 'updateUser',
+                    userId: this.state.userId,
+                    cumulativeScore: this.state.stats.cumulativeScore,
+                    rollCount: this.state.stats.rollCount,
+                    rollTri: this.state.stats.rollTri,
+                    rollStr: this.state.stats.rollStr,
+                    rollDou: this.state.stats.rollDou,
+                    coinCount: this.state.stats.coinCount,
+                    lastDate: currentDate
+                });
+
                 const params = new URLSearchParams({
                     action: 'updateUser',
                     userId: this.state.userId,
@@ -935,8 +948,26 @@
                 const combo = this.checkCombinations(results);
                 
                 if (combo) {
-                    const comboKey = `roll${combo.type.charAt(0) + combo.type.slice(1).toLowerCase()}`;
-                    this.state.stats[comboKey]++;
+                    // 콤보 타입에 따라 올바른 필드명으로 매핑
+                    let comboKey;
+                    switch(combo.type) {
+                        case 'TRIPLE':
+                            comboKey = 'rollTri';
+                            break;
+                        case 'STRAIGHT':
+                            comboKey = 'rollStr';
+                            break;
+                        case 'DOUBLE':
+                            comboKey = 'rollDou';
+                            break;
+                        default:
+                            comboKey = null;
+                    }
+                    
+                    if (comboKey) {
+                        this.state.stats[comboKey]++;
+                        console.log(`Combo ${combo.type} detected, updated ${comboKey}:`, this.state.stats[comboKey]);
+                    }
                 }
                 
                 this.displayResult(total, combo);
