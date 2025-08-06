@@ -526,12 +526,12 @@
 
         // Configuration
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyNO6OjPxsJRoVipc08PZmnEbmN_PlXAfZ9C8s8hOuF26a6tQPzaOEgFF73py4gG8FV/exec', // 실제 Google Apps Script 배포 URL로 교체 필요
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxKyZf8k8JM1LZOKp_7YbMSQfCOKcjj5FjnB1-qVCOaI-Fqz_fSJGaGQWiC6BzDGjjF/exec',
             ROLL_DURATION: 1000,
             ROLL_INTERVAL: 100,
             DICE_COUNT: 3,
             DICE_FACES: 6,
-            TIMEOUT_DURATION: 10000,
+            TIMEOUT_DURATION: 30000, // 30초로 증가
             COMBO_TYPES: {
                 DOUBLE: { text: 'Double!', class: 'combo-double', highlight: 'highlight-double' },
                 TRIPLE: { text: 'Triple!', class: 'combo-triple', highlight: 'highlight-triple' },
@@ -621,10 +621,10 @@
 
                 this.state.userId = userId;
 
-                // 먼저 테스트 모드로 실행해보기
-                if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE') || CONFIG.APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyGDIIWR4sLb_iyUJG6wT2vFqZMa_rKqRY6GUhEP5o7ZHgzJEgm1_Z4JhOhfJ4U5OI/exec') {
-                    console.warn('Apps Script URL이 설정되지 않았습니다. 테스트 모드로 실행합니다.');
-                    this.runTestMode(userId);
+                // Google Apps Script URL 검증
+                if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
+                    alert('Google Apps Script URL이 설정되지 않았습니다. 관리자에게 문의하세요.');
+                    this.elements.loadingScreen.style.display = 'none';
                     return;
                 }
 
@@ -729,10 +729,9 @@
             }
 
             async saveUserData() {
-                // 테스트 모드에서는 저장하지 않음
+                // Google Apps Script URL 검증
                 if (CONFIG.APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
-                    console.log('Test mode: Data not saved to server');
-                    console.log('Current stats:', this.state.stats);
+                    console.error('Google Apps Script URL not configured');
                     return;
                 }
 
